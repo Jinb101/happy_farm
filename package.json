@@ -1,0 +1,65 @@
+{
+  "name": "happy_farm",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite ",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint:create": "eslint --init",
+    "lint": "eslint src/**/*.{js,vue} --fix "
+  },
+  "dependencies": {
+    "@vant/area-data": "^1.5.1",
+    "@vant/touch-emulator": "^1.4.0",
+    "amfe-flexible": "^2.2.1",
+    "axios": "^1.6.2",
+    "babel-eslint": "^10.1.0",
+    "babel-helper-vue-jsx-merge-props": "^2.0.3",
+    "crypto-js": "^4.2.0",
+    "eslint-plugin-import": "^2.29.0",
+    "hammerjs": "^2.0.8",
+    "js-audio-recorder": "^1.0.7",
+    "js-md5": "^0.8.3",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.0",
+    "postcss-loader": "^7.3.3",
+    "postcss-pxtorem": "^6.0.0",
+    "postcss-value-parser": "^4.2.0",
+    "qs": "^6.11.2",
+    "three": "^0.158.0",
+    "vant": "^4.8.0",
+    "view-ui-plus": "^1.3.14",
+    "vue": "^3.3.8",
+    "vue-router": "^4.2.5",
+    "vue-wechat-title": "^2.0.7",
+    "weixin-jsapi": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.1",
+    "@vant/auto-import-resolver": "^1.0.2",
+    "@vitejs/plugin-vue": "^4.5.0",
+    "@vue/cli-plugin-router": "^5.0.8",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.54.0",
+    "eslint-plugin-vue": "^9.18.1",
+    "less": "^3.10.3",
+    "lint-staged": "^15.1.0",
+    "path-browserify": "^1.0.1",
+    "postcss": "^8.4.31",
+    "sass": "^1.69.5",
+    "tailwindcss": "^3.3.5",
+    "unplugin-vue-components": "^0.25.2",
+    "vite": "^5.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,vue}": [
+      "npm run lint",
+      "git add"
+    ]
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  }
+}
