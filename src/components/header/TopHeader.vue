@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class=" h-full w-full">
         <van-nav-bar left-text=""
                      z-index="9999"
                      @click-left="onClickLeft"
@@ -9,6 +9,7 @@
             </template>
             <template #right>
                 <span @click="onClickRight"
+                      v-if="rightShow === 'farm'"
                       class=" text-gray-500">土地</span>
             </template>
         </van-nav-bar>
@@ -41,9 +42,8 @@ const onClickRight = () => {
     showPicker.value = true
 };
 
-
-const fieldValue = ref();
 const showPicker = ref(false);
+const rightShow = ref('');
 
 const onSelect = (item) => {
     mainStor.curFarmPlot = item;
@@ -52,7 +52,11 @@ const onSelect = (item) => {
 watch(
     () => route.meta,
     () => {
+        console.log(route.meta);
         nextTick(() => {
+            if (route.meta.type) {
+                rightShow.value = route.meta.type
+            }
             title.value = route.meta.title
         });
     },
@@ -70,4 +74,8 @@ onMounted(() => {
 
 </script>
 
-<style scoped ></style>
+<style scoped >
+:deep(.van-nav-bar) {
+    height: 100%;
+}
+</style>

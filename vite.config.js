@@ -5,6 +5,7 @@ import Components from 'unplugin-vue-components/vite';
 import { VantResolver } from 'unplugin-vue-components/resolvers';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+import legacy from '@vitejs/plugin-legacy';
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
@@ -12,6 +13,9 @@ export default defineConfig({
         Components({
             resolvers: [VantResolver()], // 按需加载vant 组件
         }),
+        legacy({
+            targets: ['defaults', 'not IE 11']
+          })
     ],
     base: './',
     // // 静态资源服务的文件夹，默认public

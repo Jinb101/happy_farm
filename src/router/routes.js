@@ -7,14 +7,17 @@ let after_title = "";
 
 const routesConfig = [
   // 动态添加的路由配置对象
-  // path, component,name,title,header,footer,
+  // path, component,name,title,footer,header,header_right
   ["/login", "login/index.vue", "login", "登录", false, false],
   ["/fram", "fram/index.vue", "fram", "云土地", true, false],
   ["/har", "har/index.vue", "har", "菜市", true, false],
-  ["/user", "user/index.vue", "user", "我的", true, false],
   ["/seed", "fram/seed.vue", "seed", "种子列表", false, true],
   ["/veg", "fram/veg.vue", "veg", "我的蔬菜", false, true],
   ["/mature", "fram/mature.vue", "mature", "成熟列表", false, true],
+
+  ["/user", "user/index.vue", "user", "我的", true, false],
+  ["/path", "user/path.vue", "path", "地址铺", false, true, "none"],
+  ["/family", "user/family.vue", "family", "家庭成员", false, true, "family"],
 ];
 
 const toRoute = ([
@@ -24,6 +27,7 @@ const toRoute = ([
   title,
   isTab,
   hasHeader,
+  type,
   keepAlive,
   to,
   children,
@@ -32,8 +36,9 @@ const toRoute = ([
   name,
   meta: {
     title: prefix_title + title + after_title,
-    to,
+    to: to ?? "",
     name,
+    type: type ?? "farm",
     tab: isTab ?? false,
     hea: hasHeader ?? true,
   },

@@ -48,7 +48,7 @@ const framList = ref([
 
 
 const init = () => {
-    load.show('')
+    load.show()
     // const { data } = await http.post('myfarm')
     http.post('myobtPro', {
         farm_plot_id: mainStor.curFarmPlot.farm_plot_id

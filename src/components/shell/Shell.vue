@@ -7,14 +7,17 @@
         </div>
 
 
+
         <!-- 页面内容区域插槽 -->
         <div class="content-container"
              :style="{ height: contentHeight }">
+
             <slot />
+
         </div>
-        <!-- 底部导航栏 -->
-        <div class="  "
-             v-if="isShowFooter">
+
+        <div v-show="isShowFooter"
+             class=" footer">
             <BottomFooter />
         </div>
 
@@ -37,23 +40,13 @@ const props = defineProps({
         default: false,
     },
 });
-
+const route = useRoute();
 const isShowFooter = ref(false)
 const isShowHeader = ref(false)
 
-const route = useRoute();
 
-watch(
-    () => route.meta,
-    () => {
-        nextTick(() => {
-            //   console.log(route.meta);
-            isShowFooter.value = route.meta.tab;
-            isShowHeader.value = route.meta.hea;
-        });
-    },
-    { immediate: true }
-);
+
+
 
 // 计算页面内容区域的高度
 const contentHeight = computed(() => {
@@ -67,6 +60,19 @@ const contentHeight = computed(() => {
         return "92%";
     }
 });
+
+
+watch(
+    () => route.meta,
+    () => {
+        nextTick(() => {
+            isShowFooter.value = route.meta.tab;
+            isShowHeader.value = route.meta.hea;
+        });
+    },
+    { immediate: true }
+);
+
 
 
 
@@ -83,11 +89,17 @@ const contentHeight = computed(() => {
 .header {
     height: 6%;
     width: 100%;
+    transition: all .5s ease;
 }
 
+.footer {
+    transition: all .5s ease;
+}
 
 
 .content-container {
     width: 100%;
+    margin: 0;
+    padding: 0;
 }
 </style>

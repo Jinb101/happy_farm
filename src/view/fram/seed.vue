@@ -1,5 +1,5 @@
 <template>
-    <div class="h-full w-full pt-2">
+    <div class="h-full w-full">
         <div class="h-[8%]">
             <van-sticky>
                 <form action="/">
@@ -32,8 +32,6 @@
                 </template>
             </van-index-bar>
         </div>
-
-
 
         <transition name="move-right">
             <div v-show="restIcon"
@@ -70,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject, watch, unref, computed } from 'vue';
+import { ref, onMounted, inject, watch, unref, computed, nextTick } from 'vue';
 import ProductItem from "@/components/product/ProductItem.vue";
 import { useMainStore } from '@/store/index.js'
 import { storeToRefs } from 'pinia'
@@ -219,14 +217,15 @@ const getMySeed = () => {
 
 // 初始化
 const init = async (val) => {
-    load.show('');
+    load.show();
+    // 清空之前的索引列表和分组数据
+    indexList.value = [];
+    indexedSeedList = {};
     const { data } = await http.post('obtPro', {
         planting_month: '',
         search: val ? val : ''
     });
-    // 清空之前的索引列表和分组数据
-    indexList.value = [];
-    indexedSeedList = {};
+
 
     // 根据索引分组数据
     data.forEach((item) => {

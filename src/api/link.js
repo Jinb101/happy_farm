@@ -28,6 +28,13 @@ const MainApi = {
   obtPro: "farm/common/ObtainingProducts",
   // TODO: 获取我的产品---我的种子列表
   myobtPro: "farm/user/ObtainLandParcelProducts",
+
+  // TODO:  获取家庭成员
+  family: "farm/user/familyMembers",
+  // TODO:  获取家庭地址
+  familyPath: "farm/user/address",
+  // TODO:  添加家庭地址
+  addPath: "farm/user/addAddress",
 };
 
 export { TouristApi, MainApi };

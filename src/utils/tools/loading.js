@@ -14,18 +14,16 @@ import myLoad from "@/components/loading/index.vue";
 
 const msg = reactive({
   show: false,
-  title: "播种中...",
 });
 
 const $loading = createApp(myLoad, { msg }).mount(
   document.createElement("div")
 );
 const load = {
-  show(title, full) {
+  show(full) {
     // 控制显示loading的方法
     msg.show = true;
     msg.full = full ?? false;
-    msg.title = title ?? "播种中...";
     document.body.appendChild($loading.$el);
   },
 

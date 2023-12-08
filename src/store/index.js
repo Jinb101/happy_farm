@@ -25,6 +25,8 @@ export const useMainStore = defineStore("main", {
       curFarmPlot: null,
       // 月份列表
       curMonthList: [],
+      // 当前 footer
+      curActive: null,
     };
   },
   persist: true, // 添加 persist 属性

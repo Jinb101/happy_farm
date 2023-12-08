@@ -10,7 +10,7 @@
                            src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg" />
                 <div class=" flex flex-col justify-between items-start ml-4 h-[4rem] text-sm">
                     <div>王大锤</div>
-                    <div>农民</div>
+                    <div>家长</div>
                 </div>
             </div>
             <div class="mt-4 h-full flex justify-center items-start py-6">
@@ -26,7 +26,7 @@
                            src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg" />
                 <div class=" flex flex-col justify-between items-start ml-4 h-[4rem] text-sm">
                     <div>王小锤</div>
-                    <div>地主</div>
+                    <div>宝宝</div>
                 </div>
             </div>
 
@@ -34,24 +34,45 @@
 
         <div class="h-[75%] rounded-t-2xl absolute bottom-[1%] left-0 right-0  bg-white pt-12">
             <van-cell-group>
-                <van-cell title="个人地址"
+                <van-cell v-for="(item, index) in menuList"
+                          :key="item.key"
+                          :title="item.title"
+                          @click="toCEell(item, index)"
                           title-style="text-align:left"
                           is-link />
-                <van-cell title="家庭管理"
-                          title-style="text-align:left"
-                          is-link />
-
-                <!-- <van-cell title="我的地址"
-                          value="内容"
-                          label="描述信息"
-                          title-style="text-align:left"
-                          is-link /> -->
             </van-cell-group>
         </div>
     </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
+
+const menuList = ref([
+    {
+        title: '家庭成员',
+        icon: '',
+        to: '/family',
+        key: 1
+    },
+    {
+        title: '地址管理',
+        icon: '',
+        to: '/path',
+        key: 2
+    },
+])
+
+
+const toCEell = (item, index) => {
+    router.push(item.to)
+}
+
+
+
 </script>
 
 <style scoped ></style>

@@ -46,6 +46,9 @@ import {
   ActionSheet,
   Dialog,
   Sticky,
+  AddressList,
+  PullRefresh,
+  SwipeCell,
 } from "vant";
 
 const app = createApp(App);
@@ -80,6 +83,9 @@ app.use(Picker);
 app.use(ActionSheet);
 app.use(Sticky);
 app.use(Dialog);
+app.use(AddressList);
+app.use(PullRefresh);
+app.use(SwipeCell);
 
 app.use(pinia).use(router);
 

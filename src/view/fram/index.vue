@@ -77,7 +77,7 @@ const cardSelected = (item) => {
 }
 
 const fetchData = async () => {
-    load.show('');
+    load.show();
     try {
         const response = await http.get('banner') // 使用封装的get请求
         bannerLists.value = response.data.map((i) => !i.is_show)

@@ -152,7 +152,7 @@ const onSubmit = async (values) => {
 // 价格按钮点击
 const onPriceItem = async (item, index) => {
     try {
-        load.show("", true)
+        load.show(true)
         // if (!wherWx) return load.error('请使用手机微信打开')
         // 支付方式
         const payMode = await http.post('getPay')
@@ -250,7 +250,6 @@ const init = (e) => {
     load.loading('', true)
     Tools.getUrlParam('h5').then((value) => {
         if (!value) {
-            console.log('不存在');
             return
         }
         let wherWx = is_weixn()
@@ -266,6 +265,7 @@ const init = (e) => {
         mainStor.type = params.type
         mainStor.curMonthList = getCurMonthList()
         mainStor.wherWx = wherWx
+        mainStor.curActive = 0
         http.post('myfarm').then((r) => {
             const { data } = r
             if (data.length === 0) {

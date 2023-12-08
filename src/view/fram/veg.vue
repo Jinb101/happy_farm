@@ -25,12 +25,13 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeMount, inject, ref, unref, watch } from 'vue';
+import { onMounted, inject, ref, unref, watch } from 'vue';
 import { useMainStore } from '@/store/index.js'
+import ProductItem from "@/components/product/ProductItem.vue";
 import { storeToRefs } from 'pinia'
 
 const mainStor = useMainStore()
-const { curFarmPlot, curMonthList } = storeToRefs(mainStor)
+const { curFarmPlot } = storeToRefs(mainStor)
 
 
 const http = inject("http");
@@ -69,7 +70,7 @@ const delSeed = (item, i) => {
 }
 
 const init = async () => {
-    load.show('')
+    load.show()
     const { data } = await http.post('myobtPro', {
         farm_plot_id: mainStor.curFarmPlot.farm_plot_id
     });
