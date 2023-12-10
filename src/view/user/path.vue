@@ -15,17 +15,13 @@
         <div v-if="pathList.length > 0"
              class=" h-full w-full">
             <div class=" h-[92%] w-full px-2">
-
-
-                <van-swipe-cell>
+                <van-list v-model:loading="loading"
+                          :finished="finished"
+                          @load="onLoad">
                     <div v-for="(item, index) in pathList"
                          :key="item.user_id"
-                         class=" h-[6rem] w-full  flex justify-start items-center px-4 border-b ">
-                        <div class=" w-[12%]">
-                            <ProductItem :url="''"
-                                         :text="item.consignee" />
-                        </div>
-                        <div class=" h-[90%] ml-4 flex flex-col justify-center items-start  w-[78%] ">
+                         class=" relative h-[6rem] w-full  flex justify-start items-center px-4 border-b ">
+                        <div class=" h-[90%] ml-4 flex flex-col justify-center items-start  w-[80%] ">
                             <div class=" w-1/2 h-1/2 flex justify-between items-center">
                                 <span>{{ item.consignee }}</span>
                                 <span>{{ item.mobile }}</span>
@@ -34,20 +30,25 @@
                                 <p>{{ item.address }}</p>
                             </div>
                         </div>
-                        <div class=" flex justify-center items-center w-[10%]">
-                            <van-icon name="arrow-left"
-                                      size="4rem"
-                                      color="gray" />
+                        <div v-if="item.is_default === '1'"
+                             class=" absolute top-[15%] right-[35%] ">
+                            <van-icon name="free-postage"
+                                      size="18px"
+                                      color="#1989fa" />
                         </div>
-                        <!-- <template #right>
-                        <van-button square
-                                    text="删除"
-                                    type="danger"
-                                    class="delete-button" />
-                    </template> -->
-                    </div>
+                        <div class=" flex flex-col justify-between items-center w-[20%] h-full py-4">
+                            <van-icon size="20px"
+                                      @click="onEdit(item, index)"
+                                      color="#c8c9cc"
+                                      name="edit" />
+                            <van-icon size="20px"
+                                      @click="onDelet(item, index)"
+                                      color="#c8c9cc"
+                                      name="close" />
+                        </div>
 
-                </van-swipe-cell>
+                    </div>
+                </van-list>
 
 
             </div>
@@ -106,7 +107,7 @@
                                 block
                                 type="primary"
                                 native-type="submit">
-                        提交
+                        {{ curPathID ? '修改' : '提交' }}
                     </van-button>
                 </div>
 
@@ -125,7 +126,6 @@
 <script setup>
 import { onMounted, inject, ref, unref, watch } from 'vue';
 import { useMainStore } from '@/store/index.js'
-import ProductItem from "@/components/product/ProductItem.vue";
 import { storeToRefs } from 'pinia'
 import SelePath from '@/components/sele_path/selePath.vue';
 import citysJson from '@/assets/js/path.json'
@@ -139,6 +139,24 @@ const load = inject("load");
 const Tools = inject("Tools");
 
 
+const paging = ref({
+    page: 1,
+    limit: 10
+})
+const loading = ref(false);
+const finished = ref(true);
+
+const onLoad = () => {
+    loading.value = true;
+    // 异步更新数据
+    // setTimeout 仅做示例，真实场景中一般为 ajax 请求
+    unref(paging).page++
+    getPaht()
+};
+
+
+// 当前 选中的 id
+const curPathID = ref('')
 // 获取的 我的地址列表
 const pathList = ref([])
 // 初始化加载
@@ -146,7 +164,27 @@ const initLoading = ref(true)
 // 添加 底部 控制器
 const addShow = ref(false)
 const onAdd = () => addShow.value = true;
-const onEdit = (item, index) => Toast('编辑地址:' + index);
+const onEdit = (item, index) => {
+    pathForm.value = {
+        ...item,
+        is_default: item.is_default === '1' ? true : false,
+        pathAddress: item.province_name + '/' + item.city_name + '/' + item.county_name
+    }
+    console.log(pathForm);
+    console.log(item);
+    curPathID.value = item.farm_address_id
+    addShow.value = true
+};
+const onDelet = (item, index) => {
+    http.post("deletPath", {
+        farm_address_id: item.farm_address_id
+    }).then((res) => {
+        if (res.code === 200) {
+            getPaht()
+            load.success(res.msg)
+        }
+    })
+};
 
 // 地址json
 const pathJson = ref(null)
@@ -156,11 +194,14 @@ const pathShow = ref(false)
 const pathForm = ref({
     consignee: '',
     mobile: '',
+    // 省
     province_id: null,
+    // 市
     city_id: null,
+    // 区县
     county_id: null,
     address: null,
-    is_default: 0,
+    is_default: false,
     pathAddress: '',
 });
 
@@ -184,11 +225,17 @@ const phoneRules = [
 const onSubmit = async (values) => {
     try {
         load.show()
-        const res = await http.post('addPath', {
-            ...unref(pathForm),
-        })
+        unref(pathForm).is_default = unref(pathForm).is_default ? '1' : '0';
+        let obj = {
+            ...pathForm.value
+        }
+        if (curPathID.value !== '') {
+            obj.farm_address_id = curPathID.value
+        }
+        const res = await http.post('addPath', obj)
         getPaht()
-        load.success(res.msg)
+        load.success(curPathID.value ? '修改成功' : '')
+        curPathID.value = ''
         load.hide()
         addShow.value = !addShow.value
         console.log('submit', values, res);
@@ -273,12 +320,15 @@ let city = (ids = [], type) => {
 const getPaht = async () => {
     load.show()
     const { data } = await http.post('familyPath', {
-        page: 1,
+        page: unref(paging).page,
         limit: 200,
     })
     initLoading.value = false
     pathList.value = data
     pathJson.value = appDataCity()
+    // // 数据全部加载完成
+    finished.value = true;
+    loading.value = false;
     load.hide()
 }
 
@@ -296,5 +346,13 @@ onMounted(() => {
     -webkit-line-clamp: 2;
     /* 显示两行 */
     overflow: hidden;
+}
+
+.delete-button {
+    height: 100%;
+}
+
+:deep(.van-list) {
+    height: 100%;
 }
 </style>

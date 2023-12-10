@@ -1,6 +1,6 @@
 <template>
     <div class="h-full w-full">
-        <div class="h-[8%]">
+        <div class="h-[8%] relative">
             <van-sticky>
                 <form action="/">
                     <van-search v-model="searchVlaue"
@@ -23,10 +23,16 @@
                     <van-index-anchor :index="formattedIndex(index)">{{ formattedIndex(index) + '月' }}</van-index-anchor>
                     <div v-for="item in indexedSeedList[index]"
                          :key="item.farm_product_id">
-                        <div class=" min-h-[4.5em] w-full flex justify-start items-center px-4"
+                        <div class=" min-h-[4.5em] w-full flex justify-start items-center px-4 relative"
                              @click="addToCart(item, $event)">
                             <ProductItem :url="item.url ? item.url : ''"
                                          :text="item.product_name" />
+                            <div v-if="wehPagest(item)"
+                                 class="  h-4 w-4 flex justify-center items-center  absolute right-[10%] ">
+                                <!-- <div>{{ index + '月 ' }}</div> -->
+                                <van-icon color="#2A9CFF"
+                                          name="flag-o" />
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -47,18 +53,25 @@
         <transition name="move-down">
             <div v-show="initBtn"
                  class=" h-[8%] w-full flex justify-center items-center px-6 fixed bottom-2">
-                <div class=" w-[60%] ">
+                <div class=" w-[50%] ">
                     <van-button type="primary"
                                 ref="cartButton"
                                 @click="addSeed"
-                                :disabled="initBtnState && farmList.length === 6"
-                                block>{{ seedLength }}</van-button>
+                                :disabled="seedList.length === 0"
+                                block>种植</van-button>
                 </div>
-                <img src="/images/beilou.png"
-                     class=" absolute top-[-100%] z-[9999]"
-                     alt=""
-                     v-show="mainBtn"
-                     srcset="">
+                <div class=" absolute  right-5  z-[9999] ">
+                    <van-badge :content="seedList.length"
+                               :show-zero="seedList.length > 0"
+                               color="#1989fa">
+                        <img src="/images/beilou.png"
+                             class="child"
+                             alt=""
+                             srcset="">
+                    </van-badge>
+                </div>
+
+
             </div>
         </transition>
 
@@ -80,7 +93,8 @@ const { farmPlotList, curFarmPlot, curMonthList } = storeToRefs(mainStor)
 
 const http = inject("http");
 const load = inject("load");
-
+// 搜索列表
+const searchList = ref([])
 //月份
 const curMonth = ref(0);
 // icon
@@ -88,7 +102,6 @@ const restIcon = ref(false);
 // btn
 const initBtn = ref(false);
 const initBtnState = ref(false);
-const mainBtn = ref(false);
 // btn 实例 ref
 const cartButton = ref(null)
 // 已选 种子列表
@@ -104,9 +117,10 @@ let indexedSeedList = {};
 
 // 添加购物车
 const addToCart = (item, $event) => {
-    if (initBtnState.value || seedList.value.length === 6 || seedList.value.length + farmList.value.length === 6) return;
-    seedList.value.push(item);
-    mainBtn.value = true;
+    // if (seedList.value.length === 6 || seedList.value.length + farmList.value.length === 6) return;
+    // seedList.value.push(item);
+    let isWher = seedListSet(item)
+    if (isWher) return
     const productItem = $event.currentTarget; // 获取点击的产品元素
     const cartButtonRect = cartButton.value.$el.getBoundingClientRect(); // 获取购物车按钮的位置信息
 
@@ -116,11 +130,12 @@ const addToCart = (item, $event) => {
     // 计算抛物线的起点和终点坐标
     const startX = productItem.getBoundingClientRect().left + window.scrollX + productItem.offsetWidth / 2;
     const startY = productItem.getBoundingClientRect().top + window.scrollY + productItem.offsetHeight / 2;
-    const endX = cartButtonRect.left + cartButtonRect.width / 2 - 30;
-    const endY = (cartButtonRect.top + cartButtonRect.height / 2) - cartButton.value.$el.offsetHeight - 120;
+    const endX = cartButtonRect.left + cartButtonRect.width / 2 + 100;
+    const endY = (cartButtonRect.top + cartButtonRect.height / 2) - cartButton.value.$el.offsetHeight - 40;
 
     // 添加CSS3动画效果
     newItem.className = 'product-item';
+    newItem.style.zIndex = '3000'; // 设置定位方式为绝对定位
     newItem.style.position = 'absolute'; // 设置定位方式为绝对定位
     newItem.style.left = startX + 'px';
     newItem.style.top = startY + 'px';
@@ -129,11 +144,10 @@ const addToCart = (item, $event) => {
 
     newItem.addEventListener('transitionend', () => {
         document.body.removeChild(newItem); // 移除产品元素
-        mainBtn.value = false;
     });
-
     // 强制重绘，触发动画
     newItem.getBoundingClientRect();
+    console.log(seedList.value);
 };
 
 // 添加种植
@@ -151,39 +165,40 @@ const addSeed = () => {
         product: JSON.stringify(product)
     }).then((res) => {
         // 处理成功响应
-        load.success(res.msg);
         farmList.value.push(...seedList.value)
         initBtnState.value = farmList.value.length === 6
         seedList.value = []
+        load.success(res.msg);
     }).catch((err) => {
         load.error('种植失败');
-    }).finally(() => {
-        load.clear();
-    });
+    })
 };
-
+// 格式类型转换
 const formattedIndex = (index) => {
     return parseInt(index).toString();
 }
-
-// 按钮计算属性
-const seedLength = computed(() => {
-    if (farmList.value.length === 6) {
-        initBtnState.value = true;
-        return '土地已满';
+// 计算徽标 已选计算函数
+const seedListSet = (item) => {
+    let existingItem = wehPagest(item)
+    if (!existingItem) {
+        seedList.value.push(item);
     }
-    if (seedList.value.length === 6 || seedList.value.length + farmList.value.length === 6) {
-        initBtnState.value = true;
-        return '背篼已满 点击种植';
-    } else {
-        return `添加蔬菜  ${seedList.value.length === 0 ? '' : "(" + seedList.value.length + ")"}`;
-    }
-});
+    return existingItem
+}
 
+const wehPagest = (item) => {
+    const existingItem = seedList.value.some((seed) => {
+        return seed.planting_month === item.planting_month && seed.product_name === item.product_name;
+    });
+    return existingItem
+
+}
 watch(() => unref(searchVlaue), (val, old) => {
     if (val === '') {
         init('')
         restIcon.value = false
+    } else {
+        init(searchVlaue.value)
     }
 });
 // 获取月份
@@ -225,8 +240,6 @@ const init = async (val) => {
         planting_month: '',
         search: val ? val : ''
     });
-
-
     // 根据索引分组数据
     data.forEach((item) => {
         let index = item.planting_month;

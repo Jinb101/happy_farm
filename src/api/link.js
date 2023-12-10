@@ -35,6 +35,11 @@ const MainApi = {
   familyPath: "farm/user/address",
   // TODO:  添加家庭地址
   addPath: "farm/user/addAddress",
+  // TODO:  添加家庭地址
+  deletPath: "farm/user/deleteAddress",
+
+  // TODO: 接口：获取菜市
+  foodMark: "api/index/FoodMarket",
 };
 
 export { TouristApi, MainApi };

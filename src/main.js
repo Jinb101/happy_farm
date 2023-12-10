@@ -49,6 +49,8 @@ import {
   AddressList,
   PullRefresh,
   SwipeCell,
+  List,
+  Badge,
 } from "vant";
 
 const app = createApp(App);
@@ -86,6 +88,8 @@ app.use(Dialog);
 app.use(AddressList);
 app.use(PullRefresh);
 app.use(SwipeCell);
+app.use(List);
+app.use(Badge);
 
 app.use(pinia).use(router);
 

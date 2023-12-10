@@ -9,7 +9,7 @@
 
 
         <!-- 页面内容区域插槽 -->
-        <div class="content-container"
+        <div class="content-container z-[999]"
              :style="{ height: contentHeight }">
 
             <slot />
@@ -17,7 +17,7 @@
         </div>
 
         <div v-show="isShowFooter"
-             class=" footer">
+             class=" footer  z-[1000]">
             <BottomFooter />
         </div>
 
@@ -83,6 +83,7 @@ watch(
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow: hidden;
     /* 设置容器高度为视窗度 */
 }
 
