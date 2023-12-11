@@ -225,7 +225,7 @@ const getCurMonthList = () => {
         let targetYear = curDate.getFullYear();
 
         // 如果当前月份已经过了10天，则往后推12个月
-        if (curDay > 10 && i === 0) {
+        if (curDay > 15 && i === 0) {
             targetMonth++;
         }
 

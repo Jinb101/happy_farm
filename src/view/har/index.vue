@@ -29,6 +29,13 @@
                     </div>
                 </van-list>
             </van-pull-refresh>
+
+
+
+            <!-- 回到顶部 -->
+            <van-back-top right="8vw"
+                          style=" z-index:9999"
+                          bottom="12vh" />
         </div>
 
     </div>
@@ -83,24 +90,26 @@ const searchValue = ref('');
 const onSearch = (val) => Toast(val);
 const onClickButton = () => Toast(value.value);
 // 滚动触底
-const onLoad = (type) => {
-    setTimeout(() => {
-        if (!type) {
-            unref(paging).page++
-        }
-        if (refreshing.value) {
-            list.value = [];
-            refreshing.value = false;
-        }
-        getFoodMark()
+const onLoad = Tools.debounce((type) => {
+    if (finished.value) {
+        return
+    }
+    if (!type) {
+        unref(paging).page++
+    }
+    if (refreshing.value) {
+        list.value = [];
+        refreshing.value = false;
+    }
+    // getFoodMark()
 
-        loading.value = false;
+    loading.value = false;
 
-        if (list.value.length >= 40) {
-            finished.value = true;
-        }
-    }, 1000);
-};
+    if (list.value.length >= 40) {
+        finished.value = true;
+    }
+}, 600)
+
 
 
 
@@ -130,7 +139,7 @@ const getFoodMark = async (id, val) => {
 }
 
 const init = () => {
-    getFoodMark()
+    // getFoodMark()
 }
 
 
@@ -163,5 +172,6 @@ onMounted(() => {
 
 :deep(.van-list__loading) {
     width: 100%;
+    
 }
 </style>

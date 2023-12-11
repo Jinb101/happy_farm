@@ -11,7 +11,6 @@
         <!-- 页面内容区域插槽 -->
         <div class="content-container z-[999]"
              :style="{ height: contentHeight }">
-
             <slot />
 
         </div>
@@ -20,7 +19,6 @@
              class=" footer  z-[1000]">
             <BottomFooter />
         </div>
-
     </div>
 </template>
 

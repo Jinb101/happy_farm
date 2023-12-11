@@ -51,6 +51,7 @@ import {
   SwipeCell,
   List,
   Badge,
+  BackTop,
 } from "vant";
 
 const app = createApp(App);
@@ -90,6 +91,7 @@ app.use(PullRefresh);
 app.use(SwipeCell);
 app.use(List);
 app.use(Badge);
+app.use(BackTop);
 
 app.use(pinia).use(router);
 

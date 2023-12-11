@@ -37,6 +37,10 @@
                     </div>
                 </template>
             </van-index-bar>
+            <van-back-top right="8vw"
+                          v-if="!showBottom"
+                          style=" z-index:3000"
+                          bottom="12vh" />
         </div>
 
         <transition name="move-right">
@@ -60,7 +64,8 @@
                                 :disabled="seedList.length === 0"
                                 block>种植</van-button>
                 </div>
-                <div class=" absolute  right-5  z-[9999] ">
+                <div class=" absolute  right-5  z-[9999] "
+                     @click.stop="openSeleList">
                     <van-badge :content="seedList.length"
                                :show-zero="seedList.length > 0"
                                color="#1989fa">
@@ -70,12 +75,36 @@
                              srcset="">
                     </van-badge>
                 </div>
-
-
             </div>
         </transition>
 
-
+        <!-- 圆角弹窗（底部） -->
+        <van-popup v-model:show="showBottom"
+                   round
+                   closeable
+                   position="bottom"
+                   :style="{ height: '80%', padding: '3rem 0 10px 0' }">
+            <van-index-bar :index-list="seedIndexList">
+                <template v-for="index in seedIndexList"
+                          :key="index">
+                    <van-index-anchor :index="formattedIndex(index)">{{ formattedIndex(index) + '月' }}</van-index-anchor>
+                    <div v-for="item in indexBootomList[index]"
+                         :key="item.farm_product_id">
+                        <div class=" min-h-[4.5em] w-full flex justify-start items-center px-4 relative"
+                             @click="addToCart(item, $event)">
+                            <ProductItem :url="item.url ? item.url : ''"
+                                         :text="item.product_name" />
+                            <div v-if="wehPagest(item)"
+                                 class="  h-4 w-4 flex justify-center items-center  absolute right-[10%] ">
+                                <!-- <div>{{ index + '月 ' }}</div> -->
+                                <van-icon color="#2A9CFF"
+                                          name="flag-o" />
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </van-index-bar>
+        </van-popup>
 
     </div>
 </template>
@@ -93,8 +122,8 @@ const { farmPlotList, curFarmPlot, curMonthList } = storeToRefs(mainStor)
 
 const http = inject("http");
 const load = inject("load");
-// 搜索列表
-const searchList = ref([])
+// 底部展示
+const showBottom = ref(false)
 //月份
 const curMonth = ref(0);
 // icon
@@ -106,6 +135,7 @@ const initBtnState = ref(false);
 const cartButton = ref(null)
 // 已选 种子列表
 const seedList = ref([]);
+const seedIndexList = ref([]);
 // 我的种子
 const farmList = ref([]);
 // 索引
@@ -114,6 +144,35 @@ const indexList = ref([]);
 const searchVlaue = ref('');
 // 根据索引分组的种子列表
 let indexedSeedList = {};
+// 底部展示
+let indexBootomList = {};
+
+
+// 底部已选
+const openSeleList = () => {
+    console.log(seedList);
+    if (seedList.value.length > 0) {
+        seedIndexList.value = []
+        indexBootomList = {}
+        // 根据索引分组数据
+        seedList.value.forEach((item) => {
+            let index = item.planting_month;
+            index = formattedIndex(index);
+            if (!indexBootomList[index]) {
+                indexBootomList[index] = [];
+                seedIndexList.value.push(index);
+            }
+            indexBootomList[index].push(item);
+        });
+
+        // 对 indexList 进行排序
+        // seedIndexList.value = sortIndexList(indexList.value);
+        console.log(seedList, indexBootomList);
+        showBottom.value = true
+    }
+}
+
+
 
 // 添加购物车
 const addToCart = (item, $event) => {
@@ -147,7 +206,6 @@ const addToCart = (item, $event) => {
     });
     // 强制重绘，触发动画
     newItem.getBoundingClientRect();
-    console.log(seedList.value);
 };
 
 // 添加种植
@@ -156,10 +214,18 @@ const addSeed = () => {
         return
     }
     load.loading();
-    const product = [{
-        planting_month: curMonth.value,
-        farm_product_id: seedList.value.map(item => item.farm_product_id)
-    }];
+    const product = seedList.value.reduce((arr, item) => {
+        const existingObj = arr.find(obj => obj.planting_month === item.planting_month);
+        if (existingObj) {
+            existingObj.farm_product_id.push(item.farm_product_id);
+        } else {
+            arr.push({
+                planting_month: item.planting_month,
+                farm_product_id: [item.farm_product_id]
+            });
+        }
+        return arr;
+    }, []);
     http.post('addPro', {
         farm_plot_id: mainStor.curFarmPlot.farm_plot_id,
         product: JSON.stringify(product)
@@ -206,7 +272,9 @@ const getMonths = () => {
     const currentMonth = new Date().getMonth();
     const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     curMonth.value = months[currentMonth]
-    initBtn.value = true;
+    setTimeout(() => {
+        initBtn.value = true;
+    }, 400);
 };
 
 // 搜索操作
@@ -233,6 +301,7 @@ const getMySeed = () => {
 // 初始化
 const init = async (val) => {
     load.show();
+    nextTick()
     // 清空之前的索引列表和分组数据
     indexList.value = [];
     indexedSeedList = {};

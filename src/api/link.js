@@ -39,7 +39,7 @@ const MainApi = {
   deletPath: "farm/user/deleteAddress",
 
   // TODO: 接口：获取菜市
-  foodMark: "api/index/FoodMarket",
+  foodMark: "farm/index/FoodMarket",
 };
 
 export { TouristApi, MainApi };
