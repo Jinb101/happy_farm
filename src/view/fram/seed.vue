@@ -102,7 +102,8 @@
                     <van-index-anchor :index="formattedIndex(index)">{{ formattedIndex(index) + '月' }}</van-index-anchor>
                     <div v-for="item in indexBootomList[index]"
                          :key="item.farm_product_id">
-                        <div class=" min-h-[4.5em] w-full flex justify-start items-center px-4 relative">
+                        <div @click="details(item, index)"
+                             class=" min-h-[4.5em] w-full flex justify-start items-center px-4 relative">
                             <ProductItem :url="item.url ? item.url : ''"
                                          :text="item.product_name" />
                             <div v-if="wehPagest(item)"
@@ -174,14 +175,28 @@ const openSeleList = () => {
             }
             indexBootomList.value[index].push(item);
         });
-
         // 对 indexList 进行排序
-        // seedIndexList.value = sortIndexList(indexList.value);
-        console.log(seedList, indexBootomList.value);
+        seedIndexList.value = sortIndexList(seedIndexList.value);
         showBottom.value = true
     }
 }
 
+// 背篓详情 点击
+const details = (item, index) => {
+    console.log(seedIndexList, index, seedList);
+    // 如果已存在的项目，只删除相同的
+    indexBootomList.value[index] = indexBootomList.value[index].filter((i) => i.farm_product_id !== item.farm_product_id);
+    seedListSet(item)
+    seedIndexList.value.forEach((item) => {
+        let index = item;
+        index = formattedIndex(index);
+        if (indexBootomList.value[index]) {
+            if (indexBootomList.value[index].length === 0) {
+                seedIndexList.value = seedIndexList.value.filter((key) => key !== index);
+            }
+        }
+    });
+}
 
 // 添加购物车
 const addToCart = (item, $event, type, index) => {
