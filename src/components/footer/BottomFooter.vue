@@ -183,7 +183,8 @@ li a.active {
 }
 
 li a.active .link-text {
-    font-size: 13px;
+    font-size: 12px;
+    margin-left: 5px;
     opacity: 1;
     transition: .1s;
 }
