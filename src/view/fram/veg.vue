@@ -1,124 +1,143 @@
 <template>
-    <div class=" h-full w-full">
-        <div v-if="indexList.length === 0 && !loading"><van-empty description="暂无蔬菜" />
+    <div class="h-full w-full">
+        <div v-if="framList.length === 0 && !loading">
+            <van-empty description="暂无蔬菜" />
         </div>
-
-        <van-tabs v-model:active="active"
-                  sticky>
-            <van-tab title="待成熟">
-                <van-index-bar :index-list="indexList">
-                    <template v-for="index in indexList"
-                              :key="index">
-                        <van-index-anchor
-                                          :index="formattedIndex(index)">{{ formattedIndex(index) + '月' }}</van-index-anchor>
-                        <div v-for="item in indexedSeedList[index]"
-                             :key="item.farm_product_id"
-                             class=" h-[4.5em] w-full flex justify-start items-center px-4">
-                            <div class=" w-full border-b border-slate-100 h-full flex justify-start items-center">
-                                <div class=" ">
-                                    <ProductItem :url="item.url ? item.url : ''"
-                                                 :text="item.product_name" />
-                                </div>
-                            </div>
+        <div v-else
+             class="h-full w-full px-4 overflow-y-auto ">
+            <van-list v-model:loading="listLoading"
+                      :finished="finished"
+                      offset="10"
+                      finished-text="没有更多了"
+                      @load="onLoad">
+                <van-skeleton title
+                              avatar
+                              :row="2"
+                              v-for="(item, index) in framList"
+                              :key="index + 'fram'"
+                              :loading="loading">
+                    <div style="
+                box-shadow: 0 3.2px 12px #00000014, 0 5px 25px #0000000a;
+              "
+                         class=" flex justify-start items-center w-full rounded-xl px-2 py-2 mt-4">
+                        <ProductItem :url="item.url ? item.url : 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'"
+                                     :text="item.product_name" />
+                        <div class="flex flex-col justify-between items-start ml-4 h-[4rem]">
+                            <div>title</div>
+                            <div>描述..........</div>
                         </div>
-                    </template>
-                </van-index-bar>
-            </van-tab>
-            <van-tab title="已成熟">
-                <Mature></Mature>
-            </van-tab>
-        </van-tabs>
-
-
-
-
-
+                    </div>
+                </van-skeleton>
+            </van-list>
+            <van-back-top right="9vw"
+                          :z-index="3000"
+                          :style="{ backgroundColor: ' rgb(147 197 253)' }"
+                          bottom="12vh" />
+        </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted, inject, ref, unref, watch } from 'vue';
+import { onMounted, onBeforeMount, inject, ref, unref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useMainStore } from '@/store/index.js'
-import ProductItem from "@/components/product/ProductItem.vue";
 import { storeToRefs } from 'pinia'
-import Mature from '@/view/fram/mature.vue';
+import ProductItem from "@/components/product/ProductItem.vue";
 
 const mainStor = useMainStore()
-const { curFarmPlot } = storeToRefs(mainStor)
+const { user, access_token, nursery_id, wherWx, farmPlotList, curFarmPlot } = storeToRefs(mainStor)
 
 
 const http = inject("http");
+const Tools = inject("Tools");
 const load = inject("load");
-// 索引
-const indexList = ref([]);
-// 选中索引
-const active = ref(0);
-// 根据索引分组的种子列表
-let indexedSeedList = {};
+
 const loading = ref(true);
-const framList = ref([
-    {}, {}, {}, {}, {}, {}, {}, {}, {},
-])
+const listLoading = ref(false);
+const finished = ref(false);
+const framList = ref([]);
 
-// 监听土地变化
-watch(curFarmPlot, (val) => {
-    init()
-})
-
-const formattedIndex = (index) => {
-    return parseInt(index).toString();
-}
-
-// 删除 蔬菜
-const delSeed = (item, i) => {
-    load.model('您的蔬菜还有xxx成熟,是否铲除', (r) => {
-        if (r) {
-            http.post('deltPro', {
-                farm_plot_products_id: item.farm_plot_products_id
-            }).then((res) => {
-                framList.value.splice(i, 1);
-                // 处理成功响应
-                load.success(res.msg);
-            })
-        }
-    })
-}
-
-const init = async () => {
-    load.show()
-    const { data } = await http.post('myobtPro', {
-        farm_plot_id: mainStor.curFarmPlot.farm_plot_id
-    });
-    if (data.length > 0) {
-        framList.value = data
-    } else {
-        framList.value = []
-    }
-    // 根据索引分组数据
-    data.forEach((item) => {
-        let index = item.planting_month;
-        index = formattedIndex(index);
-        if (!indexedSeedList[index]) {
-            indexedSeedList[index] = [];
-            indexList.value.push(index);
-        }
-        indexedSeedList[index] = [...item.Product];
-    });
-    load.hide()
-    loading.value = false
-}
-
-
-onMounted(() => {
-    init()
+// 分页
+const pageIng = ref({
+    page: 1,
+    limit: 10
 });
 
+// 下拉
+const onLoad = () => {
+    if (finished.value) {
+        return;
+    }
+    listLoading.value = true;
+    unref(pageIng).page++;
+    getData();
+    listLoading.value = false;
+};
+
+//监听当前 土地id
+watch(
+    () => unref(curFarmPlot).farm_plot_id,
+    (va) => {
+        getData()
+    }
+)
+
+
+const getData = () => {
+    load.show();
+    console.log(curFarmPlot);
+    http
+        .post("cooked", {
+            farm_plot_id: unref(curFarmPlot).farm_plot_id,
+            ...unref(pageIng)
+        })
+        .then((res) => {
+            let obj = {
+                "farm_cooked_food_id": "熟菜id",
+                "farm_plot_id": "地块id",
+                "farm_product_id": "菜品id",
+                "estimated_quantity": "预估数量",
+                "remaining_quantity": "剩余数量",
+                "picking_start_time": "采摘开始时间",
+                "picking_end_time": "采摘结束时间",
+                "create_time": "创建时间",
+                "FarmProduct": [{//菜品信息
+                    "farm_product_id": "菜品id",
+                    product_name: '菜品名称',
+                    price: '价格'
+                }]
+            }
+            for (let i = 0; i < 20; i++) {
+                framList.value.push(obj)
+            }
+            if (res.data.length === 0) {
+                finished.value = true;
+            } else {
+                framList.value.push(...res.data);
+            }
+            console.log(res);
+            load.hide();
+            setTimeout(() => {
+                loading.value = false;
+            }, 600);
+        })
+        .catch((error) => {
+            console.error(error);
+            // 处理错误情况
+        });
+
+
+};
+
+const init = () => {
+    loading.value = true;
+    getData();
+};
+
+onMounted(() => {
+    init();
+});
 
 </script>
 
-<style scoped >
-:deep(.van-index-anchor) {
-    text-align: left;
-    background: #F6F8FB;
-}
-</style>
+<style scoped></style>

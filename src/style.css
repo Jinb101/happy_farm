@@ -48,6 +48,19 @@ h1 {
     text-align: center;
 }
 
+.btn-show {
+    box-shadow:
+    /*底部灰色阴影*/ 2px 4px 2px 3px rgba(0, 0, 0, 0.15),
+        /*下面深蓝色立体阴影*/ 2px 2px 1px 1px #14cd3f96,
+        /*内部暗色阴影*/ 0 -3px 2px 2px rgba(0, 0, 0, 0.1) inset;
+}
+.user_btn_show {
+    box-shadow:
+    /*底部灰色阴影*/ 2px 4px 2px 5px rgba(0, 0, 0, 0.15),
+        /*下面深蓝色立体阴影*/ 2px 2px 1px 1px #fff,
+        /*内部暗色阴影*/ 0 -3px 2px 2px rgba(0, 0, 0, 0.1) inset;
+}
+
 @media (prefers-color-scheme: light) {
     :root {
         color: #213547;

@@ -1,6 +1,6 @@
 <template>
     <nav>
-        <div class="link-bg"></div>
+        <div class="link-bg btn-show"></div>
         <ul>
             <li class=" w-1/3 "
                 v-for="(item, index) in menuList"

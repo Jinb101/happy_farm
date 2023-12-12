@@ -1,5 +1,5 @@
 <template>
-    <div class="h-11 w-11 rounded-full flex justify-center items-center bg-blue-400  text-white text-[12px] "
+    <div class="h-11 w-11 rounded-full flex justify-center items-center bg-blue-400  text-white text-[12px] overflow-hidden"
          :class="url ? '' : ' '">
         <template v-if="url">
             <img class="h-full w-full"

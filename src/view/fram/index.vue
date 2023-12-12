@@ -20,14 +20,13 @@
                 <div v-for="(item, index ) in btnList"
                      :key="index"
                      @click="cardSelected(item, index)"
-                     style="box-shadow: 0 3.2px 12px #00000014, 0 5px 25px #0000000a"
                      :class="!item.state && index !== 3 ? 'bg-gray-300' : ''"
-                     class=" w-1/3 h-[40%] flexitems-center justify-center rounded-xl relative bg-[#14cd3f8e] text-[#fff] px-2">
+                     class="btn-show w-1/3 h-[40%] flexitems-center justify-center rounded-xl relative bg-[#14cd3f96] text-[#fff] px-2">
                     <div class=" absolute right-2 bottom-2">
                         <van-icon :name="item.icon"
                                   size="20" />
                     </div>
-                    <div class=" flex justify-start items-start w-[60%] h-full pt-4">
+                    <div class=" flex justify-start items-start w-full h-full pt-4 text-left">
                         {{ item.title }}
                     </div>
                 </div>
@@ -44,9 +43,7 @@ import { onMounted, ref, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import { useMainStore } from '@/store/index.js'
 import { storeToRefs } from 'pinia'
-
 import FarmModel from '@/view/fram/model.vue'
-import { load } from '@/utils/tools/loading.js';
 
 const router = useRouter();
 const mainStor = useMainStore()
@@ -69,7 +66,7 @@ const btnList = [
     },
     {
         title: '逛菜市',
-        to: 'mature',
+        to: 'market',
         icon: 'notes-o',
         state: status
     },

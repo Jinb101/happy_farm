@@ -29,8 +29,9 @@
                     </div>
                 </van-skeleton>
             </van-list>
-            <van-back-top right="8vw"
-                          style="z-index: 3000"
+            <van-back-top right="9vw"
+                          :z-index="3000"
+                          :style="{ backgroundColor: ' rgb(147 197 253)' }"
                           bottom="12vh" />
         </div>
     </div>

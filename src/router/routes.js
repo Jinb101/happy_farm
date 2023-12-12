@@ -13,7 +13,8 @@ const routesConfig = [
   ["/har", "har/index.vue", "har", "菜市", true, false],
   ["/seed", "fram/seed.vue", "seed", "种子列表", false, true],
   ["/veg", "fram/veg.vue", "veg", "我的蔬菜", false, true],
-  ["/mature", "fram/mature.vue", "mature", "成熟列表", false, true],
+  ["/market", "fram/market.vue", "market", "菜市", false, true],
+  ["/edu", "fram/edu.vue", "edu", "大自然教育", false, true, false],
 
   ["/user", "user/index.vue", "user", "我的", true, false],
   ["/path", "user/path.vue", "path", "地址铺", false, true, "none"],
