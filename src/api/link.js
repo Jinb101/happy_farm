@@ -40,6 +40,9 @@ const MainApi = {
 
   // TODO: 接口：获取菜市
   foodMark: "farm/index/FoodMarket",
+
+  // TODO: 接口：菜市菜地熟菜列表
+  cooked: "farm/index/CookedVegetables",
 };
 
 export { TouristApi, MainApi };

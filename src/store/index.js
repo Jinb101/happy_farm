@@ -11,6 +11,8 @@ export const useMainStore = defineStore("main", {
   // 2. 必须是箭头函数，这样是为了更好的 TS 类型推导
   state: () => {
     return {
+      // 状态 1 购买 0 未购买
+      status: 0,
       // 源
       type: "",
       // 用户信息

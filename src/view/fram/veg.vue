@@ -2,22 +2,34 @@
     <div class=" h-full w-full">
         <div v-if="indexList.length === 0 && !loading"><van-empty description="暂无蔬菜" />
         </div>
-        <van-index-bar :index-list="indexList">
-            <template v-for="index in indexList"
-                      :key="index">
-                <van-index-anchor :index="formattedIndex(index)">{{ formattedIndex(index) + '月' }}</van-index-anchor>
-                <div v-for="item in indexedSeedList[index]"
-                     :key="item.farm_product_id"
-                     class=" h-[4.5em] w-full flex justify-start items-center px-4">
-                    <div class=" w-full border-b border-slate-100 h-full flex justify-start items-center">
-                        <div class=" ">
-                            <ProductItem :url="item.url ? item.url : ''"
-                                         :text="item.product_name" />
+
+        <van-tabs v-model:active="active"
+                  sticky>
+            <van-tab title="待成熟">
+                <van-index-bar :index-list="indexList">
+                    <template v-for="index in indexList"
+                              :key="index">
+                        <van-index-anchor
+                                          :index="formattedIndex(index)">{{ formattedIndex(index) + '月' }}</van-index-anchor>
+                        <div v-for="item in indexedSeedList[index]"
+                             :key="item.farm_product_id"
+                             class=" h-[4.5em] w-full flex justify-start items-center px-4">
+                            <div class=" w-full border-b border-slate-100 h-full flex justify-start items-center">
+                                <div class=" ">
+                                    <ProductItem :url="item.url ? item.url : ''"
+                                                 :text="item.product_name" />
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </template>
-        </van-index-bar>
+                    </template>
+                </van-index-bar>
+            </van-tab>
+            <van-tab title="已成熟">
+                <Mature></Mature>
+            </van-tab>
+        </van-tabs>
+
+
 
 
 
@@ -29,6 +41,7 @@ import { onMounted, inject, ref, unref, watch } from 'vue';
 import { useMainStore } from '@/store/index.js'
 import ProductItem from "@/components/product/ProductItem.vue";
 import { storeToRefs } from 'pinia'
+import Mature from '@/view/fram/mature.vue';
 
 const mainStor = useMainStore()
 const { curFarmPlot } = storeToRefs(mainStor)
@@ -38,6 +51,8 @@ const http = inject("http");
 const load = inject("load");
 // 索引
 const indexList = ref([]);
+// 选中索引
+const active = ref(0);
 // 根据索引分组的种子列表
 let indexedSeedList = {};
 const loading = ref(true);

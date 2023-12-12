@@ -26,14 +26,12 @@ onMounted(() => {
             <shell>
                 <Loading />
                 <AsyncRouterView>
+
                 </AsyncRouterView>
+
             </shell>
         </transition>
     </div>
 </template>
 
-<style >
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-</style>
+<style ></style>

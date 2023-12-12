@@ -5,7 +5,7 @@
             <!--<img src="@/assets/img/loading_white.png">-->
             <van-loading vertical
                          type="spinner"
-                         color="#AAB5B7"
+                         color="gray"
                          size="30px">{{ msg.title }}</van-loading>
         </div>
     </div>
@@ -37,7 +37,7 @@ const props = defineProps({
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 3500;
 
     .load_box {
         height: 100%;

@@ -1,12 +1,13 @@
 <template>
-    <div class="h-11 w-11 rounded-full bg-blue-400 text-white flex justify-center items-center text-[12px] px-2 py-1">
+    <div class="h-11 w-11 rounded-full flex justify-center items-center bg-blue-400  text-white text-[12px] "
+         :class="url ? '' : ' '">
         <template v-if="url">
             <img class="h-full w-full"
                  :src="url"
                  alt="product-image" />
         </template>
         <template v-else>
-            <div class="text">
+            <div class="text px-2 py-1">
                 {{ truncatedText }}
             </div>
         </template>

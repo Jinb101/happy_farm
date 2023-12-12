@@ -49,7 +49,7 @@ const isShowHeader = ref(false)
 // 计算页面内容区域的高度
 const contentHeight = computed(() => {
     if (!isShowHeader.value && !isShowFooter.value) {
-        return "100%";
+        return "100vh";
     } else if (isShowHeader.value && !isShowFooter.value) {
         return "94%";
     } else if (isShowHeader.value && isShowFooter.value) {
@@ -76,12 +76,17 @@ watch(
 
 </script>
 <style >
+* {
+    margin: 0;
+    padding: 0;
+}
+
 /* 样式可以在这里定义 */
 .app-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
+
     /* 设置容器高度为视窗度 */
 }
 
@@ -98,7 +103,5 @@ watch(
 
 .content-container {
     width: 100%;
-    margin: 0;
-    padding: 0;
 }
 </style>

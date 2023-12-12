@@ -20,16 +20,28 @@
             <van-index-bar :index-list="indexList">
                 <template v-for="index in indexList"
                           :key="index">
-                    <van-index-anchor :index="formattedIndex(index)">{{ formattedIndex(index) + '月' }}</van-index-anchor>
+                    <van-index-anchor :index="formattedIndex(index)">
+                        <span>{{ formattedIndex(index) + '月' }}</span>
+                        <div class=" w-[60%] mr-3 flex justify-center items-center gap-20 text-black font-medium ">
+                            <div>已选</div>
+                            <div>可选</div>
+                        </div>
+                    </van-index-anchor>
                     <div v-for="item in indexedSeedList[index]"
                          :key="item.farm_product_id">
-                        <div class=" min-h-[4.5em] w-full flex justify-start items-center px-4 relative"
+                        <div class=" min-h-[4.5em] w-full flex justify-start items-center px-4 relative "
                              @click="addToCart(item, $event)">
-                            <ProductItem :url="item.url ? item.url : ''"
-                                         :text="item.product_name" />
+                            <div class="model_item">
+                                <ProductItem :url="item.url ? item.url : ''"
+                                             :text="item.product_name" />
+                            </div>
+                            <div class=" ml-4 text-[14x]">
+                                <!-- <span>
+                                    价值: {{ item.price + '/斤' }}
+                                </span> -->
+                            </div>
                             <div v-if="wehPagest(item)"
                                  class="  h-4 w-4 flex justify-center items-center  absolute right-[10%] ">
-                                <!-- <div>{{ index + '月 ' }}</div> -->
                                 <van-icon color="#2A9CFF"
                                           name="flag-o" />
                             </div>
@@ -37,9 +49,9 @@
                     </div>
                 </template>
             </van-index-bar>
-            <van-back-top right="8vw"
-                          v-if="!showBottom"
-                          style=" z-index:3000"
+            <van-back-top right="9vw"
+                          :z-index="3000"
+                          :style="{ backgroundColor: ' rgb(147 197 253)' }"
                           bottom="12vh" />
         </div>
 
@@ -57,7 +69,7 @@
         <transition name="move-down">
             <div v-show="initBtn"
                  class=" h-[8%] w-full flex justify-center items-center px-6 fixed bottom-2">
-                <div class=" w-[50%] ">
+                <div class=" w-[50%]">
                     <van-button type="primary"
                                 ref="cartButton"
                                 @click="addSeed"
@@ -90,8 +102,7 @@
                     <van-index-anchor :index="formattedIndex(index)">{{ formattedIndex(index) + '月' }}</van-index-anchor>
                     <div v-for="item in indexBootomList[index]"
                          :key="item.farm_product_id">
-                        <div class=" min-h-[4.5em] w-full flex justify-start items-center px-4 relative"
-                             @click="addToCart(item, $event)">
+                        <div class=" min-h-[4.5em] w-full flex justify-start items-center px-4 relative">
                             <ProductItem :url="item.url ? item.url : ''"
                                          :text="item.product_name" />
                             <div v-if="wehPagest(item)"
@@ -105,7 +116,6 @@
                 </template>
             </van-index-bar>
         </van-popup>
-
     </div>
 </template>
 
@@ -114,6 +124,7 @@ import { ref, onMounted, inject, watch, unref, computed, nextTick } from 'vue';
 import ProductItem from "@/components/product/ProductItem.vue";
 import { useMainStore } from '@/store/index.js'
 import { storeToRefs } from 'pinia'
+
 
 const Tools = inject("Tools");
 const wxTools = inject("wxTools");
@@ -143,44 +154,40 @@ const indexList = ref([]);
 // 搜索
 const searchVlaue = ref('');
 // 根据索引分组的种子列表
-let indexedSeedList = {};
+const indexedSeedList = ref({});
 // 底部展示
-let indexBootomList = {};
+let indexBootomList = ref({});
 
 
 // 底部已选
 const openSeleList = () => {
-    console.log(seedList);
     if (seedList.value.length > 0) {
         seedIndexList.value = []
-        indexBootomList = {}
+        indexBootomList.value = {}
         // 根据索引分组数据
         seedList.value.forEach((item) => {
             let index = item.planting_month;
             index = formattedIndex(index);
-            if (!indexBootomList[index]) {
-                indexBootomList[index] = [];
+            if (!indexBootomList.value[index]) {
+                indexBootomList.value[index] = [];
                 seedIndexList.value.push(index);
             }
-            indexBootomList[index].push(item);
+            indexBootomList.value[index].push(item);
         });
 
         // 对 indexList 进行排序
         // seedIndexList.value = sortIndexList(indexList.value);
-        console.log(seedList, indexBootomList);
+        console.log(seedList, indexBootomList.value);
         showBottom.value = true
     }
 }
 
 
-
 // 添加购物车
-const addToCart = (item, $event) => {
-    // if (seedList.value.length === 6 || seedList.value.length + farmList.value.length === 6) return;
-    // seedList.value.push(item);
+const addToCart = (item, $event, type, index) => {
     let isWher = seedListSet(item)
-    if (isWher) return
-    const productItem = $event.currentTarget; // 获取点击的产品元素
+    if (isWher) return;
+    let productItem = $event.currentTarget.querySelector('.model_item');
     const cartButtonRect = cartButton.value.$el.getBoundingClientRect(); // 获取购物车按钮的位置信息
 
     const newItem = productItem.cloneNode(true); // 复制点击的产品元素
@@ -203,11 +210,12 @@ const addToCart = (item, $event) => {
 
     newItem.addEventListener('transitionend', () => {
         document.body.removeChild(newItem); // 移除产品元素
+
     });
     // 强制重绘，触发动画
     newItem.getBoundingClientRect();
-};
 
+};
 // 添加种植
 const addSeed = () => {
     if (seedList.value.length < 1) {
@@ -246,19 +254,22 @@ const formattedIndex = (index) => {
 // 计算徽标 已选计算函数
 const seedListSet = (item) => {
     let existingItem = wehPagest(item)
-    if (!existingItem) {
+    if (existingItem) {
+        seedList.value = seedList.value.filter((i) => i !== item);
+    } else {
         seedList.value.push(item);
     }
     return existingItem
 }
-
+// 是否存在
 const wehPagest = (item) => {
     const existingItem = seedList.value.some((seed) => {
         return seed.planting_month === item.planting_month && seed.product_name === item.product_name;
     });
     return existingItem
-
 }
+
+// 搜索
 watch(() => unref(searchVlaue), (val, old) => {
     if (val === '') {
         init('')
@@ -304,7 +315,7 @@ const init = async (val) => {
     nextTick()
     // 清空之前的索引列表和分组数据
     indexList.value = [];
-    indexedSeedList = {};
+    indexedSeedList.value = {};
     const { data } = await http.post('obtPro', {
         planting_month: '',
         search: val ? val : ''
@@ -313,11 +324,11 @@ const init = async (val) => {
     data.forEach((item) => {
         let index = item.planting_month;
         index = formattedIndex(index);
-        if (!indexedSeedList[index]) {
-            indexedSeedList[index] = [];
+        if (!indexedSeedList.value[index]) {
+            indexedSeedList.value[index] = [];
             indexList.value.push(index);
         }
-        indexedSeedList[index].push(item);
+        indexedSeedList.value[index].push(item);
     });
 
     // 对 indexList 进行排序
@@ -326,7 +337,6 @@ const init = async (val) => {
 };
 
 const sortIndexList = (list) => {
-
     list.sort((a, b) => {
         if (a === curMonthList.value[0]) {
             return -1;
@@ -351,13 +361,15 @@ const sortIndexList = (list) => {
 onMounted(() => {
     getMonths()
     init();
-    getMySeed()
+    // getMySeed()
 });
 </script>
 
 <style scoped>
 :deep(.van-index-anchor) {
-    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: #F6F8FB;
 }
 

@@ -254,7 +254,6 @@ const init = (e) => {
         }
         let wherWx = is_weixn()
         const params = Tools.decrypt(value)
-        console.log(params, mainStor);
         mainStor.access_token = params.data.access_token
         Tools.storage('s', 'set', 'Basics', {
             access_token: params.data.access_token,
@@ -268,18 +267,13 @@ const init = (e) => {
         mainStor.curActive = 0
         http.post('myfarm').then((r) => {
             const { data } = r
-            if (data.length === 0) {
-                move.value = true
-                return
-            }
             mainStor.farmPlotList = data
+            mainStor.status = data.length === 0 ? 0 : 1
             mainStor.curFarmPlot = data[0]
             router.replace('/fram')
             load.clear()
         })
     })
-
-
 }
 
 

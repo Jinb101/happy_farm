@@ -18,8 +18,8 @@ import shell from "@/components/shell/Shell.vue";
 
 import "view-ui-plus/dist/styles/viewuiplus.css";
 import "tailwindcss/tailwind.css";
-import "vant/lib/index.css";
 import "./style.css";
+import "vant/lib/index.css";
 
 // vant
 import {
@@ -51,7 +51,10 @@ import {
   SwipeCell,
   List,
   Badge,
+  Progress,
+  Tab,
   BackTop,
+  Tabs,
 } from "vant";
 
 const app = createApp(App);
@@ -91,6 +94,9 @@ app.use(PullRefresh);
 app.use(SwipeCell);
 app.use(List);
 app.use(Badge);
+app.use(Progress);
+app.use(Tab);
+app.use(Tabs);
 app.use(BackTop);
 
 app.use(pinia).use(router);
@@ -102,4 +108,5 @@ app.provide("http", http);
 app.provide("Tools", Tools);
 app.provide("load", load);
 app.provide("wxTools", wxTools);
+
 app.mount("#app");
