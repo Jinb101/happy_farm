@@ -103,9 +103,9 @@
                     <van-index-anchor :index="formattedIndex(index)">{{
                         formattedIndex(index) + "月"
                     }}</van-index-anchor>
-                    <div v-for="item in indexBootomList[index]"
+                    <div v-for="item in seedList[index]"
                          :key="item.farm_product_id">
-                        <div @click="details(item, index)"
+                        <div @click="seedListSet(item, $event, index)"
                              class="min-h-[4.5em] w-full flex justify-start items-center px-4 relative">
                             <ProductItem :url="item.url ? item.url : ''"
                                          :text="item.product_name" />
@@ -164,45 +164,20 @@ let indexBootomList = ref({});
 
 // 底部已选
 const openSeleList = () => {
-    if (seedList.value.length > 0) {
+    if (Object.keys(seedList.value).length > 0) {
         seedIndexList.value = [];
         indexBootomList.value = {};
-        // 根据索引分组数据
-        seedList.value.forEach((item) => {
-            let index = item.planting_month;
-            index = formattedIndex(index);
-            if (!indexBootomList.value[index]) {
-                indexBootomList.value[index] = [];
-                seedIndexList.value.push(index);
+        for (let key in seedList.value) {
+            if (seedList.value.hasOwnProperty(key)) {
+                seedIndexList.value.push(key)
             }
-            indexBootomList.value[index].push(item);
-        });
-        // 对 indexList 进行排序
+        }
         seedIndexList.value = sortIndexList(seedIndexList.value);
         showBottom.value = true;
     }
 };
 
-// 背篓详情 点击
-const details = (item, index) => {
-    console.log(seedIndexList, index, seedList);
-    // 如果已存在的项目，只删除相同的
-    indexBootomList.value[index] = indexBootomList.value[index].filter(
-        (i) => i.farm_product_id !== item.farm_product_id
-    );
-    seedListSet(item);
-    seedIndexList.value.forEach((item) => {
-        let index = item;
-        index = formattedIndex(index);
-        if (indexBootomList.value[index]) {
-            if (indexBootomList.value[index].length === 0) {
-                seedIndexList.value = seedIndexList.value.filter(
-                    (key) => key !== index
-                );
-            }
-        }
-    });
-};
+
 
 // 添加购物车
 const addToCart = (item, $event, index) => {
@@ -295,6 +270,13 @@ const seedListSet = (item, envnt, index) => {
             unref(seedList)[index].splice(existingSeedIndex, 1);
             console.log(`删除 ${item.product_name}`);
             seedLength.value--
+            console.log(unref(seedList)[index], seedIndexList);
+            if (unref(seedList)[index].length === 0) {
+                seedIndexList.value = seedIndexList.value.filter((i) => i !== index);
+            }
+            if (seedIndexList.value.length === 0) {
+                showBottom.value = false
+            }
             return;
         }
     }
@@ -305,6 +287,7 @@ const seedListSet = (item, envnt, index) => {
     }
     unref(seedList)[index].push(item);
     seedLength.value++;
+    addToCart(item, event, index)
     console.log(`添加 ${item.product_name}`, seedList);
 };
 
