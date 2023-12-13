@@ -77,13 +77,13 @@ watch(
                 const ul = document.querySelector('ul');
                 const li = ul.querySelectorAll('li')[curActive.value];
                 bg.style.backgroundColor = 'transparent';
-                // 使用nextTick确保在下一次DOM更新周期之后执行
+                // 使用 nextTick 确保在下一次 DOM 更新周期之后执行
                 nextTick(() => {
                     const rect = li.getBoundingClientRect();
                     const distance = rect.left - ul.offsetLeft - rect.width / 2 + 40;
                     bg.style.transform = `translate(${distance}px, -50%)`;
                     bg.style.backgroundColor = '#14cd3f8e';
-                    active.value = curActive.value; // 匹配则更新active.value
+                    active.value = curActive.value; // 匹配则更新 active.value
                 });
             }
         })
@@ -101,7 +101,7 @@ const selefApp = () => {
         })
         el.classList.add('active')
     }
-    // 遍历所有a便签 绑定事件
+    // 遍历所有 a 便签 绑定事件
     links.forEach((link, index) => {
         link.addEventListener('click', e => {
             e.preventDefault();
@@ -204,6 +204,6 @@ li a.active .fa {
     top: 50%;
     transform: translateY(-50%);
     z-index: 0;
-    transition: 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+    transition: 0.3s cubic-bezier(0.77, 0, 0.175, 1);
 }
 </style>

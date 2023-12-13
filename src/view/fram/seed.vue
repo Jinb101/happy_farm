@@ -3,18 +3,14 @@
         <div class="h-[8%] relative">
             <van-sticky>
                 <form action="/">
-                    <van-search
-                        v-model="searchVlaue"
-                        show-action
-                        shape="round"
-                        placeholder="请输入蔬菜名称"
-                        @search="onSearch"
-                    >
+                    <van-search v-model="searchVlaue"
+                                show-action
+                                shape="round"
+                                placeholder="请输入蔬菜名称"
+                                @search="onSearch">
                         <template #action>
-                            <div
-                                class="text-gray-400"
-                                @click="onSearch(searchVlaue)"
-                            >
+                            <div class="text-gray-400"
+                                 @click="onSearch(searchVlaue)">
                                 搜索
                             </div>
                         </template>
@@ -24,133 +20,100 @@
         </div>
         <div class="h-[92%] overflow-y-auto pb-[4rem]">
             <van-index-bar :index-list="indexList">
-                <template v-for="index in indexList" :key="index">
+                <template v-for="index in indexList"
+                          :key="index">
                     <van-index-anchor :index="formattedIndex(index)">
                         <span>{{ formattedIndex(index) + "月" }}</span>
-                        <div
-                            class="w-[60%] mr-3 flex justify-center items-center gap-20 text-black font-medium"
-                        >
+                        <div class="w-[60%] mr-3 flex justify-center items-center gap-20 text-black font-medium">
                             <div>已选</div>
                             <div>可选</div>
                         </div>
                     </van-index-anchor>
-                    <div
-                        v-for="item in indexedSeedList[index]"
-                        :key="item.farm_product_id"
-                    >
-                        <div
-                            class="min-h-[4.5em] w-full flex justify-start items-center px-4 relative"
-                            @click="addToCart(item, $event)"
-                        >
+                    <div v-for="item in indexedSeedList[index]"
+                         :key="item.farm_product_id">
+                        <div class="min-h-[4.5em] w-full flex justify-start items-center px-4 relative"
+                             @click="seedListSet(item, $event, index)">
                             <div class="model_item">
-                                <ProductItem
-                                    :url="item.url ? item.url : ''"
-                                    :text="item.product_name"
-                                />
+                                <ProductItem :url="item.url ? item.url : ''"
+                                             :text="item.product_name" />
                             </div>
                             <div class="ml-4 text-[14x]">
-                                <!-- <span>
-                                    价值: {{ item.price + '/斤' }}
-                                </span> -->
+                                <span>
+                                    {{ item.product_name }}
+                                </span>
                             </div>
-                            <div
-                                v-if="wehPagest(item)"
-                                class="h-4 w-4 flex justify-center items-center absolute right-[10%]"
-                            >
-                                <van-icon color="#2A9CFF" name="flag-o" />
+                            <div v-show="wehPagest(item, index)"
+                                 class="h-4 w-4 flex justify-center items-center absolute right-[10%]">
+                                <van-icon color="#2A9CFF"
+                                          name="flag-o" />
                             </div>
                         </div>
                     </div>
                 </template>
             </van-index-bar>
-            <van-back-top
-                right="9vw"
-                :z-index="3000"
-                :style="{ backgroundColor: ' rgb(147 197 253)' }"
-                bottom="12vh"
-            />
+            <van-back-top right="9vw"
+                          :z-index="3000"
+                          :style="{ backgroundColor: ' rgb(147 197 253)' }"
+                          bottom="12vh" />
         </div>
 
         <transition name="move-right">
-            <div
-                v-show="restIcon"
-                @click="searchVlaue = ''"
-                class="w-[4rem] h-[4rem] flex justify-center items-center px-2 py-2 rounded-full border shadow-inner fixed right-8 bottom-[15%]"
-            >
-                <van-icon
-                    name="replay"
-                    color="rgba(128, 128, 128, 0.4)"
-                    size="2rem"
-                />
+            <div v-show="restIcon"
+                 @click="searchVlaue = ''"
+                 class="w-[4rem] h-[4rem] flex justify-center items-center px-2 py-2 rounded-full border shadow-inner fixed right-8 bottom-[15%]">
+                <van-icon name="replay"
+                          color="rgba(128, 128, 128, 0.4)"
+                          size="2rem" />
             </div>
         </transition>
 
         <transition name="move-down">
-            <div
-                v-show="initBtn"
-                class="h-[8%] w-full flex justify-center items-center px-6 fixed bottom-2"
-            >
+            <div v-show="initBtn"
+                 class="h-[8%] w-full flex justify-center items-center px-6 fixed bottom-2">
                 <div class="w-[50%]">
-                    <van-button
-                        type="primary"
-                        ref="cartButton"
-                        @click="addSeed"
-                        :disabled="seedList.length === 0"
-                        block
-                        >种植</van-button
-                    >
+                    <van-button type="primary"
+                                ref="cartButton"
+                                @click="addSeed"
+                                :disabled="seedList.length === 0"
+                                block>种植</van-button>
                 </div>
-                <div
-                    class="absolute right-5 z-[9999]"
-                    @click.stop="openSeleList"
-                >
-                    <van-badge
-                        :content="seedList.length"
-                        :show-zero="seedList.length > 0"
-                        color="#1989fa"
-                    >
-                        <img
-                            src="/images/beilou.png"
-                            class="child"
-                            alt=""
-                            srcset=""
-                        />
+                <div class="absolute right-5 z-[9999]"
+                     @click.stop="openSeleList">
+                    <van-badge :content="seedLength"
+                               :show-zero="seedLength > 0"
+                               color="#1989fa">
+                        <img src="/images/beilou.png"
+                             class="child"
+                             alt=""
+                             srcset="" />
                     </van-badge>
                 </div>
             </div>
         </transition>
 
         <!-- 圆角弹窗（底部） -->
-        <van-popup
-            v-model:show="showBottom"
-            round
-            closeable
-            position="bottom"
-            :style="{ height: '80%', padding: '3rem 0 10px 0' }"
-        >
+        <van-popup v-model:show="showBottom"
+                   round
+                   closeable
+                   position="bottom"
+                   :style="{ height: '80%', padding: '3rem 0 10px 0' }">
             <van-index-bar :index-list="seedIndexList">
-                <template v-for="index in seedIndexList" :key="index">
+                <template v-for="index in seedIndexList"
+                          :key="index">
                     <van-index-anchor :index="formattedIndex(index)">{{
                         formattedIndex(index) + "月"
                     }}</van-index-anchor>
-                    <div
-                        v-for="item in indexBootomList[index]"
-                        :key="item.farm_product_id"
-                    >
-                        <div
-                            @click="details(item, index)"
-                            class="min-h-[4.5em] w-full flex justify-start items-center px-4 relative"
-                        >
-                            <ProductItem
-                                :url="item.url ? item.url : ''"
-                                :text="item.product_name"
-                            />
-                            <div
-                                v-if="wehPagest(item)"
-                                class="h-4 w-4 flex justify-center items-center absolute right-[10%]"
-                            >
+                    <div v-for="item in indexBootomList[index]"
+                         :key="item.farm_product_id">
+                        <div @click="details(item, index)"
+                             class="min-h-[4.5em] w-full flex justify-start items-center px-4 relative">
+                            <ProductItem :url="item.url ? item.url : ''"
+                                         :text="item.product_name" />
+                            <div v-show="wehPagest(item, index)"
+                                 class="h-4 w-4 flex justify-center items-center absolute right-[10%]">
                                 <!-- <div>{{ index + '月 ' }}</div> -->
-                                <van-icon color="#2A9CFF" name="flag-o" />
+                                <van-icon color="#2A9CFF"
+                                          name="flag-o" />
                             </div>
                         </div>
                     </div>
@@ -185,7 +148,8 @@ const initBtnState = ref(false);
 // btn 实例 ref
 const cartButton = ref(null);
 // 已选 种子列表
-const seedList = ref([]);
+const seedList = ref({});
+const seedLength = ref(0);
 const seedIndexList = ref([]);
 // 我的种子
 const farmList = ref([]);
@@ -241,9 +205,7 @@ const details = (item, index) => {
 };
 
 // 添加购物车
-const addToCart = (item, $event, type, index) => {
-    let isWher = seedListSet(item);
-    if (isWher) return;
+const addToCart = (item, $event, index) => {
     let productItem = $event.currentTarget.querySelector(".model_item");
     const cartButtonRect = cartButton.value.$el.getBoundingClientRect(); // 获取购物车按钮的位置信息
 
@@ -266,7 +228,7 @@ const addToCart = (item, $event, type, index) => {
         cartButton.value.$el.offsetHeight -
         40;
 
-    // 添加CSS3动画效果
+    // 添加 CSS3 动画效果
     newItem.className = "product-item";
     newItem.style.zIndex = "3000"; // 设置定位方式为绝对定位
     newItem.style.position = "absolute"; // 设置定位方式为绝对定位
@@ -274,9 +236,8 @@ const addToCart = (item, $event, type, index) => {
     newItem.style.top = startY + "px";
     newItem.style.transition =
         "transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)";
-    newItem.style.transform = `translate(${endX - startX}px, ${
-        endY - startY
-    }px)`;
+    newItem.style.transform = `translate(${endX - startX}px, ${endY - startY
+        }px)`;
 
     newItem.addEventListener("transitionend", () => {
         document.body.removeChild(newItem); // 移除产品元素
@@ -324,22 +285,38 @@ const formattedIndex = (index) => {
     return parseInt(index).toString();
 };
 // 计算徽标 已选计算函数
-const seedListSet = (item) => {
-    let existingItem = wehPagest(item);
-    if (existingItem) {
-        seedList.value = seedList.value.filter((i) => i !== item);
-    } else {
-        seedList.value.push(item);
+const seedListSet = (item, envnt, index) => {
+    // 检查 seedList 是否具有指定月份的键
+    if (unref(seedList).hasOwnProperty(index)) {
+        // 查找是否已经有相同的种子项
+        const existingSeedIndex = unref(seedList)[index].findIndex(seed => seed.farm_product_id === item.farm_product_id);
+        if (existingSeedIndex > -1) {
+            // 如果存在相同的种子项，则从数组中删除该项
+            unref(seedList)[index].splice(existingSeedIndex, 1);
+            console.log(`删除 ${item.product_name}`);
+            seedLength.value--
+            return;
+        }
     }
-    return existingItem;
+
+    // 添加新的种子项到数组中
+    if (!unref(seedList).hasOwnProperty(index)) {
+        unref(seedList)[index] = [];
+    }
+    unref(seedList)[index].push(item);
+    seedLength.value++;
+    console.log(`添加 ${item.product_name}`, seedList);
 };
+
 // 是否存在
-const wehPagest = (item) => {
-    const existingItem = seedList.value.some((seed) => {
-        return (
-            seed.planting_month === item.planting_month &&
-            seed.product_name === item.product_name
-        );
+const wehPagest = (item, index) => {
+    let existingItem = false
+    const months = item.planting_month.split(',');
+    months.forEach((month) => {
+        month = formattedIndex(month);
+        if (seedList.value[`${month}`] && month === index) {
+            existingItem = seedList.value[`${month}`].some(seed => seed.farm_product_id === item.farm_product_id);
+        }
     });
     return existingItem;
 };
@@ -393,20 +370,24 @@ const init = async (val) => {
     nextTick();
     // 清空之前的索引列表和分组数据
     indexList.value = [];
+    seedList.value = [];
     indexedSeedList.value = {};
     const { data } = await http.post("obtPro", {
         planting_month: "",
         search: val ? val : "",
     });
+    console.log(data);
     // 根据索引分组数据
     data.forEach((item) => {
-        let index = item.planting_month;
-        index = formattedIndex(index);
-        if (!indexedSeedList.value[index]) {
-            indexedSeedList.value[index] = [];
-            indexList.value.push(index);
-        }
-        indexedSeedList.value[index].push(item);
+        const months = item.planting_month.split(',');
+        months.forEach((month) => {
+            month = formattedIndex(month);
+            if (!indexedSeedList.value[month]) {
+                indexedSeedList.value[month] = [];
+                indexList.value.push(month);
+            }
+            indexedSeedList.value[month].push(item);
+        });
     });
 
     // 对 indexList 进行排序

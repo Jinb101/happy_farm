@@ -44,7 +44,8 @@
                 <div v-for="(item, index) in priceList"
                      :key="index"
                      @click="selePrice = index"
-                     class="price_item relative btn-show sele_border">
+                     :class="selePrice === index ? 'btn-show' : ''"
+                     class="price_item relative  sele_border transition-all duration-500">
                     <div>{{ priceNameList[index] }}</div>
                     <div class="flex justify-between items-center">
                         <div>
@@ -98,6 +99,7 @@ const mainStor = useMainStore()
 const { status, access_token, nursery_id, wherWx } = storeToRefs(mainStor)
 const http = inject("http")
 const load = inject("load")
+const wxTools = inject("wxTools");
 
 // 轮播
 const bannerLists = ref([])
@@ -123,7 +125,7 @@ const fetchData = async () => {
     load.show()
     try {
         const { data } = await http.post('getPrice')
-        const response = await http.get('banner') // 使用封装的get请求
+        const response = await http.get('banner') // 使用封装的 get 请求
         bannerLists.value = response.data.map((i) => !i.is_show)
         priceList.value = data
     } catch (error) {
@@ -133,12 +135,13 @@ const fetchData = async () => {
     move.value = true;
 }
 
+// 地块 id
+const farm_id = ref('')
 
 // 价格按钮点击
 const onPriceItem = async (index) => {
-    return
     try {
-        load.show(true)
+        load.loading('', true)
         // if (!wherWx) return load.error('请使用手机微信打开')
         // 支付方式
         const payMode = await http.post('getPay')
@@ -147,7 +150,7 @@ const onPriceItem = async (index) => {
         switch (curIndex) {
             case '1':
                 console.log('微信支付');
-                // 订单ID
+                // 订单 ID
                 const payScribe = await http.post('subscribe', {
                     // farm_id: 1,
                     purchase_type: index
@@ -164,6 +167,7 @@ const onPriceItem = async (index) => {
                 }).then((res) => {
                     if (res.code === 208) {
                         load.success('支付成功\n请设置信息')
+                        init()
                         showBottom.value = false
                     } else {
                         load.info('请刷新重试')
@@ -174,13 +178,27 @@ const onPriceItem = async (index) => {
                 console.log('二维码');
                 break;
         }
+        load.clear()
     } catch (error) {
+        load.clear()
         load.info('请刷新重试')
         console.log(error.message);
-    } finally {
-        load.hide()
+
     }
 }
+
+// 初始化 定义状态
+const init = (e) => {
+    http.post('myfarm').then((r) => {
+        const { data } = r
+        mainStor.farmPlotList = data
+        mainStor.status = data.length === 0 ? 0 : 1
+        if (data.length > 0) {
+            mainStor.curFarmPlot = data[0]
+        }
+    })
+}
+
 
 
 

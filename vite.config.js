@@ -11,14 +11,14 @@ export default defineConfig({
     plugins: [
         vue(),
         Components({
-            resolvers: [VantResolver()], // 按需加载vant 组件
+            resolvers: [VantResolver()], // 按需加载 vant 组件
         }),
         legacy({
             targets: ['defaults', 'not IE 11']
           })
     ],
     base: './',
-    // // 静态资源服务的文件夹，默认public
+    // // 静态资源服务的文件夹，默认 public
     publicDir: 'public',
     // 自定义组件
     compilerOptions: {
@@ -51,7 +51,7 @@ export default defineConfig({
         proxy: {
             '/dev': {
                 pathRewrite: {
-                    '^/dev': ''  // 将/api替换为空字符串，确保代理时能够正确匹配路径
+                    '^/dev': ''  // 将/api 替换为空字符串，确保代理时能够正确匹配路径
                   },
                 target: 'http://test.lide.jsxrk.xin',
                 changeOrigin: true,
@@ -69,7 +69,7 @@ export default defineConfig({
                 changeOrigin: true,
                 logLevel: 'debug',
                 pathRewrite: {
-                  '^/env': ''// 重写,
+                  '^/env': ''// 重写，
                 }
               },
         },
@@ -79,15 +79,15 @@ export default defineConfig({
         outDir: "./dist",
         //emptyOutDir: true,
         //assetsDir: "assets", //指定静态资源存放路径
-        // sourcemap: false, //是否构建source map 文件
+        // sourcemap: false, //是否构建 source map 文件
         terserOptions: {
-          // 生产环境移除console
+          // 生产环境移除 console
           compress: {
             drop_console: false,
             drop_debugger: true,
           },
         },
-        // 块大小警告的限制（以 kbs 为单位） 默认： 500
+        // 块大小警告的限制（以 kbs 为单位）默认：500
         chunkSizeWarningLimit: 1000,
         // 分解块，将大块分解成更小的块
         rollupOptions: {

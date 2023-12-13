@@ -6,7 +6,6 @@
 
 
         </div>
-
     </div>
 </template>
 
@@ -27,6 +26,7 @@ const initLoading = ref(false)
 
 const init = async () => {
     load.show()
+    console.log(curFarmPlot);
     const { data } = await http.post('family', {
         farm_plot_id: curFarmPlot.value.farm_plot_id
     })

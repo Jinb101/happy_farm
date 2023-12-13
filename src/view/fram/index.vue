@@ -20,8 +20,8 @@
                 <div v-for="(item, index ) in btnList"
                      :key="index"
                      @click="cardSelected(item, index)"
-                     :class="!item.state && index !== 3 ? 'bg-gray-300' : ''"
-                     class="btn-show w-1/3 h-[40%] flexitems-center justify-center rounded-xl relative bg-[#14cd3f96] text-[#fff] px-2">
+                     :class="!item.state && index !== 3 ? 'bg-gray-300' : 'btn-show'"
+                     class=" w-1/3 h-[40%] flexitems-center justify-center rounded-xl relative bg-[#14cd3f96] text-[#fff] px-2">
                     <div class=" absolute right-2 bottom-2">
                         <van-icon :name="item.icon"
                                   size="20" />
@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class=" h-1/3 w-full rounded-t-lg shadow-inner shadow-slate-300">
-            <FarmModel />
+            <FarmModel @masDeta="openMas" />
         </div>
     </div>
 </template>
@@ -47,7 +47,7 @@ import FarmModel from '@/view/fram/model.vue'
 
 const router = useRouter();
 const mainStor = useMainStore()
-const { status, access_token, nursery_id, wherWx } = storeToRefs(mainStor)
+const { status, curFarmPlot, wherWx } = storeToRefs(mainStor)
 const http = inject("http")
 
 
@@ -56,25 +56,25 @@ const btnList = [
         title: '选种子',
         to: 'seed',
         icon: 'hot-o',
-        state: status
+        state: status.value
     },
     {
         title: '我的蔬菜',
         to: 'veg',
         icon: 'flower-o',
-        state: status
+        state: status.value
     },
     {
         title: '逛菜市',
         to: 'market',
         icon: 'notes-o',
-        state: status
+        state: status.value
     },
     {
         title: '大自然教育',
         to: 'edu',
         icon: 'hotel-o',
-        state: status
+        state: status.value
     },
 ]
 
@@ -84,20 +84,28 @@ const btnList = [
 const bannerLists = ref([])
 
 const cardSelected = (item, index) => {
+    console.log(item.state, 0 == false);
     if (!item.state && index !== 3) {
         return
     }
     router.push(item.to)
 }
 
+// 模型详情
+const openMas = (data) => {
+    mainStor.masData = data
+    router.push('/video')
+}
+
 const fetchData = async () => {
     try {
-        const response = await http.get('banner') // 使用封装的get请求
+        const response = await http.get('banner')
         bannerLists.value = response.data.map((i) => !i.is_show)
     } catch (error) {
         console.error(error)
     }
 }
+
 
 onMounted(() => {
     fetchData()

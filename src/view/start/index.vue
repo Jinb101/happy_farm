@@ -132,7 +132,7 @@ const formValue = ref({
     telephone: '',
     plot_name: '',
 })
-// 地块id
+// 地块 id
 const farm_id = ref('')
 
 
@@ -145,7 +145,7 @@ const onSubmit = async (values) => {
         telephone: unref(formValue).telephone,
         plot_name: unref(formValue).plot_name,
     })
-    load.success('马上赶往您的土地!')
+    load.success('马上赶往您的土地！')
     router.replace('/fram')
     console.log('submit', values);
 };
@@ -162,7 +162,7 @@ const onPriceItem = async (item, index) => {
         switch (curIndex) {
             case '1':
                 console.log('微信支付');
-                // 订单ID
+                // 订单 ID
                 const payScribe = await http.post('subscribe', {
                     // farm_id: 1,
                     purchase_type: index
@@ -229,7 +229,7 @@ const getCurMonthList = () => {
             targetMonth++;
         }
 
-        // 处理月份超出12的情况
+        // 处理月份超出 12 的情况
         if (targetMonth >= 12) {
             targetMonth -= 12;
             targetYear++;
@@ -254,7 +254,9 @@ const init = (e) => {
         }
         let wherWx = is_weixn()
         const params = Tools.decrypt(value)
+        console.log(params);
         mainStor.access_token = params.data.access_token
+        mainStor.nursery_id = 0
         Tools.storage('s', 'set', 'Basics', {
             access_token: params.data.access_token,
             n_id: 0,
@@ -267,12 +269,16 @@ const init = (e) => {
         mainStor.curActive = 0
         http.post('myfarm').then((r) => {
             const { data } = r
+            console.log(data);
             mainStor.farmPlotList = data
             mainStor.status = data.length === 0 ? 0 : 1
-            mainStor.curFarmPlot = data[0]
+            if (data.length > 0) {
+                mainStor.curFarmPlot = data[0]
+            }
             router.replace('/fram')
             load.clear()
         })
+        console.log(mainStor);
     })
 }
 

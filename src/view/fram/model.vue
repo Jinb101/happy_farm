@@ -3,7 +3,8 @@
          ref="rendererContainer"
          id="tree-container"
          style="touch-action: none;">
-        <div class="absolute right-0 top-8 w-10  rounded-l-2xl flex justify-end items-center "
+        <div @click.stop="getMyFarm"
+             class="absolute right-0 top-8 w-10  rounded-l-2xl flex justify-end items-center "
              style="box-shadow: 0 3.2px 12px #00000014, 0 5px 25px #0000000a">
             <img src="../../assets/images/rem.png"
                  alt=""
@@ -13,7 +14,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, inject } from 'vue';
+import { useMainStore } from '@/store/index.js'
+import { storeToRefs } from 'pinia'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as THREE from 'three';
@@ -27,13 +30,34 @@ let fbxLoader;
 let controls;
 let modelLoaded = ref(false);
 
+const http = inject("http")
+const load = inject("load")
+const mainStor = useMainStore()
+const { curFarmPlot } = storeToRefs(mainStor)
+
+
+const emit = defineEmits(['masDeta'])
+
+
+
+// 获取地块详情
+const getMyFarm = async () => {
+    load.loading('', true)
+    const { data } = await http.post('masDeta', {
+        farm_plot_id: curFarmPlot.value.farm_plot_id
+    })
+    emit('masDeta', data)
+}
+
+
+
 // 监听模型加载完成事件
 watch(modelLoaded, (value) => {
     if (value) {
         // 在这里可以调用动画函数来实现在指定时间内转换到指定的视角坐标
-        // 例如: animateToPosition(new THREE.Vector3(x, y, z), duration);
+        // 例如：animateToPosition(new THREE.Vector3(x, y, z), duration);
 
-        // 示例：在2秒内转换到指定的视角坐标
+        // 示例：在 2 秒内转换到指定的视角坐标
         // animateToPosition(new THREE.Vector3(-3, 180, -630), 2000, new THREE.Euler(0, Math.PI / 2, 0));
         animateToPosition(new THREE.Vector3(-490, 230, -560), 2000, new THREE.Euler(0, Math.PI, 0));
     }
@@ -52,7 +76,7 @@ const animate = () => {
                 if (child.isMesh) {
                     child.material.opacity += 0.01; // 每帧增加透明度
                     if (child.material.opacity > 1) {
-                        child.material.opacity = 1; // 限制透明度最大值为1
+                        child.material.opacity = 1; // 限制透明度最大值为 1
                     }
                 }
             });
@@ -62,11 +86,11 @@ const animate = () => {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap // THREE.PCFShadowMap (default)
     // renderer.physicallyCorrectLights = true 	//正确的物理灯光照射
-    // renderer.outputEncoding = THREE.sRGBEncoding	//采用sRGBEncoding
-    renderer.toneMapping = THREE.ACESFilmicToneMapping  //aces标准
+    // renderer.outputEncoding = THREE.sRGBEncoding	//采用 sRGBEncoding
+    renderer.toneMapping = THREE.ACESFilmicToneMapping  //aces 标准
     renderer.toneMappingExposure = 1.1		//色调映射曝光度
     renderer.shadowMap.enabled = true	//阴影就不用说了
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap //阴影类型（处理运用Shadow Map产生的阴影锯齿）
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap //阴影类型（处理运用 Shadow Map 产生的阴影锯齿）
     renderer.render(scene, camera);
 };
 
@@ -76,7 +100,7 @@ onMounted(() => {
 
     // 创建相机
     const aspectRatio = rendererContainer.clientWidth / rendererContainer.clientHeight;
-    camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 1000); // 修改fov值
+    camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 1000); // 修改 fov 值
     camera.position.set(0, 650, 0); // 设置相机位置
 
     // 创建渲染器
@@ -196,9 +220,9 @@ const animateToPosition = (position, duration) => {
 <style scoped>
 .model {
     opacity: 0;
-    /* 初始透明度为0 */
+    /* 初始透明度为 0 */
     transition: opacity .3s;
-    /* 添加过渡效果，持续1秒 */
+    /* 添加过渡效果，持续 1 秒 */
 }
 
 #tree-container {

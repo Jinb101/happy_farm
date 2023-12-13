@@ -25,13 +25,13 @@ const $loading = createApp(myLoad, { msg }).mount(
 );
 const load = {
   show(full) {
-    // 控制显示loading的方法
+    // 控制显示 loading 的方法
     msg.show = true;
     msg.full = full ?? false;
     document.body.appendChild($loading.$el);
   },
   hide() {
-    // 控制loading隐藏的方法
+    // 控制 loading 隐藏的方法
     msg.show = false;
   },
   info(err) {
@@ -39,16 +39,14 @@ const load = {
       message: err,
     });
   },
-  loading(err, de) {
+  loading(err, de = false) {
     let opt = {
       type: "loading",
       message: err ? err : "",
       forbidClick: true,
       overlay: false,
+      duration: de ? 0 : 2000,
     };
-    if (de) {
-      opt.duration = 0;
-    }
     showToast(opt);
   },
   success(err) {
@@ -65,7 +63,6 @@ const load = {
   },
   clear() {
     closeToast();
-    // Toast.clear();
   },
   model(message, fu) {
     showConfirmDialog({

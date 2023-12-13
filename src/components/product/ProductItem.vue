@@ -7,7 +7,7 @@
                  alt="product-image" />
         </template>
         <template v-else>
-            <div class="text px-2 py-1">
+            <div class="text px-2 py-1 ">
                 {{ truncatedText }}
             </div>
         </template>
@@ -39,7 +39,11 @@ const truncatedText = computed(() => {
 
 <style scoped>
 .text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    /* 控制最多显示的行数 */
 }
 </style>

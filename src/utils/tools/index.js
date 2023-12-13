@@ -58,7 +58,7 @@ export function getUrlParam(key) {
  * @param {number} delay - 时间
  */
 export function debounce(fn, delay) {
-  delay = delay || 1000; //默认1s后执行
+  delay = delay || 1000; //默认 1s 后执行
   let timer = null;
   return function () {
     let context = this;
@@ -88,7 +88,7 @@ export function compressImage(imageFile) {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
 
-        // 假设将图片调整为宽度为800像素
+        // 假设将图片调整为宽度为 800 像素
         const targetWidth = 800;
         const targetHeight = (img.height / img.width) * targetWidth;
 
@@ -116,7 +116,7 @@ export function compressImage(imageFile) {
           },
           "image/jpeg",
           0.2
-        ); // 压缩质量为70%
+        ); // 压缩质量为 70%
       };
     };
   });
@@ -136,7 +136,7 @@ export function compressVideo(videoFile) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      // 假设将视频调整为宽度为800像素
+      // 假设将视频调整为宽度为 800 像素
       const targetWidth = 800;
       const targetHeight = (video.videoHeight / video.videoWidth) * targetWidth;
 
@@ -182,14 +182,14 @@ export function compressVideo(videoFile) {
         stream.getTracks().forEach((track) => {
           track.stop();
         });
-      }, 5000); // 假设压缩时长为5秒
+      }, 5000); // 假设压缩时长为 5 秒
     };
   });
 }
 /**
  * 压缩文件
  * @param {File} file - 要压缩的文件
- * @returns {Promise<File|null>} - 返回压缩后的文件，如果不支持的文件类型则返回null
+ * @returns {Promise<File|null>} - 返回压缩后的文件，如果不支持的文件类型则返回 null
  */
 export function compressFile(file) {
   console.log(`正在压缩文件：${file.name}`);
@@ -205,10 +205,61 @@ export function compressFile(file) {
 }
 
 /**
+ * 随机生成函数
+ * @returns {object} 返回包含三个方法的对象：mock、vars、produce
+ */
+export function myRandom() {
+  // 定义辅助函数，生成指定范围内的随机整数
+  const generateRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  // mock 方法
+  const mock = (t, n) => {
+    t = isNaN(t) ? Math.random() : t;
+    n = isNaN(n) ? Math.random() : n;
+    let r = "qwertyuiopasdfghjklzxcvbnm",
+      o = "0123456789",
+      i =
+        t > 0.5
+          ? r.charAt(generateRandomInt(0, r.length - 1))
+          : o.charAt(generateRandomInt(0, o.length - 1));
+    return n > 0.5 ? i.toUpperCase() : i.toLowerCase();
+  };
+
+  // vars 方法
+  const vars = (e) => {
+    e = isNaN(e) ? 6 : e;
+    e = e < 1 ? 1 : e;
+    let n = mock(1);
+    for (let r = 0; r < e - 1; r++) n += mock();
+    return n;
+  };
+
+  // produce 方法
+  const produce = (t, o) => {
+    let i = t || vars(),
+      a = this.$obj(this.fictitious[i], 1);
+    return a === 7
+      ? ((this.fictitious[i] = 0), i)
+      : a === 1
+      ? (o ? (this.fictitious[i] = 0) : this.fictitious[i]++, i)
+      : produce();
+  };
+
+  return {
+    mock,
+    vars,
+    produce,
+  };
+}
+/**
  * 加密解密
  * @param {string} key - 加密密钥
  * @param {string} val - 要加密或解密的数据
- * @param {boolean} type - 加密或解密的类型，true为解密，false为加密
+ * @param {boolean} type - 加密或解密的类型，true 为解密，false 为加密
  * @returns {string} - 返回加密或解密后的数据
  */
 export function md5(key, val, type) {
@@ -240,13 +291,13 @@ export function md5(key, val, type) {
  * @returns {string} - 返回加密后的数据
  */
 export function encrypt(data, url, type = "web", join = "_____") {
-  let t = cls ? cls : demo;
   let o = {
     type,
     data,
     url,
   };
-  let k = t.$random.vars();
+  let random = myRandom();
+  let k = random.vars();
   let c = md5(k, JSON.stringify(o), 0);
   return [encodeURIComponent(c), k].join(join);
 }

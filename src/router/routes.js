@@ -19,6 +19,17 @@ const routesConfig = [
   ["/user", "user/index.vue", "user", "我的", true, false],
   ["/path", "user/path.vue", "path", "地址铺", false, true, "none"],
   ["/family", "user/family.vue", "family", "家庭成员", false, true, "family"],
+
+  //components
+  [
+    "/video",
+    "components/video/VideoModel.vue",
+    "video",
+    "土地",
+    false,
+    true,
+    "none",
+  ],
 ];
 
 const toRoute = ([
@@ -44,9 +55,10 @@ const toRoute = ([
     hea: hasHeader ?? true,
   },
   component: () =>
-    import(/* @vite-ignore */ `../view/${component}`).then(
-      (module) => module.default
-    ),
+    import(
+      /* @vite-ignore */
+      `${component.startsWith("components") ? "../" : "../view/"}${component}`
+    ).then((module) => module.default),
   ...(keepAlive ? { meta: { keepAlive: true } } : {}),
   ...(children ? { children: children.map(toRoute) } : {}),
 });
