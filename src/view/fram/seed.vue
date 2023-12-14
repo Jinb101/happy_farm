@@ -222,34 +222,37 @@ const addToCart = (item, $event, index) => {
 };
 // 添加种植
 const addSeed = () => {
-    if (seedList.value.length < 1) {
+    if (Object.keys(seedList.value).length < 1) {
         return;
     }
     load.loading();
-    const product = seedList.value.reduce((arr, item) => {
-        const existingObj = arr.find(
-            (obj) => obj.planting_month === item.planting_month
-        );
-        if (existingObj) {
-            existingObj.farm_product_id.push(item.farm_product_id);
-        } else {
-            arr.push({
-                planting_month: item.planting_month,
-                farm_product_id: [item.farm_product_id],
-            });
-        }
+    const product = Object.entries(seedList.value).reduce((arr, [key, values]) => {
+        console.log(values, key);
+        arr.push({
+            planting_month: key,
+            farm_product_id: values.map((item) => {
+                return item.farm_product_id
+            }),
+        })
         return arr;
     }, []);
+    console.log(product);
     http.post("addPro", {
-        farm_plot_id: mainStor.curFarmPlot.farm_plot_id,
+        farm_plot_id: curFarmPlot.value.farm_plot_id,
         product: JSON.stringify(product),
     })
         .then((res) => {
-            // 处理成功响应
-            farmList.value.push(...seedList.value);
-            initBtnState.value = farmList.value.length === 6;
-            seedList.value = [];
-            load.success(res.msg);
+            if (res.code == 200) {
+                // 处理成功响应
+                farmList.value.push(...seedList.value);
+                initBtnState.value = farmList.value.length === 6;
+                seedList.value = {};
+                seedLength.value = 0
+                load.success(res.data.msg);
+            } else {
+                console.log(res);
+                load.error(res.data.msg);
+            }
         })
         .catch((err) => {
             load.error("种植失败");
