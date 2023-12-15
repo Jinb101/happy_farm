@@ -186,6 +186,10 @@ const monthItemSele = (index) => {
 const monthItemOptional = (index) => {
     let text = ''
     if (unref(monthSeleList)[index]) {
+        if (unref(seedList)[index] && unref(seedList)[index].length > 0) {
+            return text = `可选 : ${unref(monthSeleList)[index].cultivable - unref(seedList)[index].length}`
+
+        }
         text = `可选 : ${unref(monthSeleList)[index].cultivable - unref(monthSeleList)[index].selected}`
     }
     return text
@@ -195,7 +199,6 @@ const editOptional = (index, type) => {
     const day = daysUntilMonthEnd(); // 获取本月剩余天数
     let result
     const currentMonth = new Date().getMonth() + 1;
-    // = getEndDateMonth(index, totalDays)
 
     // // 遍历已选择的蔬菜对象列表
     for (let seed in unref(seedList)) {
