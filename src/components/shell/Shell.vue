@@ -87,6 +87,7 @@ watch(
     flex-direction: column;
     height: 100vh;
     width: 100vw;
+    overflow-y: hidden;
     /* 设置容器高度为视窗度 */
 }
 

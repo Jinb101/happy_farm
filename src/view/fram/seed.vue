@@ -24,9 +24,11 @@
                           :key="index">
                     <van-index-anchor :index="formattedIndex(index)">
                         <span>{{ formattedIndex(index) + "月" }}</span>
-                        <div class="w-[60%] mr-3 flex justify-center items-center gap-20 text-black font-medium">
-                            <div>已选</div>
-                            <div>可选</div>
+                        <div class="w-[50%] mr-8 flex justify-center items-center gap-20 text-black font-medium">
+                            <div class=" w-1/2"
+                                 v-text='monthItemSele(index)'></div>
+                            <div class=" w-1/2"
+                                 v-text='monthItemOptional(index)'></div>
                         </div>
                     </van-index-anchor>
                     <div v-for="item in indexedSeedList[index]"
@@ -37,9 +39,12 @@
                                 <ProductItem :url="item.url ? item.url : ''"
                                              :text="item.product_name" />
                             </div>
-                            <div class="ml-4 text-[14x]">
+                            <div class="ml-4 text-[14x] flex flex-col justify-center items-start">
                                 <span>
                                     {{ item.product_name }}
+                                </span>
+                                <span class=" text-xs">
+                                    {{ '生长周期 :' + item.planting_cycle + ' 天' }}
                                 </span>
                             </div>
                             <div v-show="wehPagest(item, index)"
@@ -74,7 +79,7 @@
                     <van-button type="primary"
                                 ref="cartButton"
                                 @click="addSeed"
-                                :disabled="seedList.length === 0"
+                                :disabled="seedLength === 0"
                                 block>种植</van-button>
                 </div>
                 <div class="absolute right-5 z-[9999]"
@@ -151,6 +156,9 @@ const cartButton = ref(null);
 const seedList = ref({});
 const seedLength = ref(0);
 const seedIndexList = ref([]);
+// 已选 可选 列表
+const monthSeleList = ref({});
+let monthMap = {};
 // 我的种子
 const farmList = ref([]);
 // 索引
@@ -162,13 +170,102 @@ const indexedSeedList = ref({});
 // 底部展示
 let indexBootomList = ref({});
 
+
+// 计算 每月已选 selected
+const monthItemSele = (index) => {
+    let text = ''
+    if (unref(seedList)[index]) {
+        text = `已选 : ${unref(seedList)[index].length}`
+    }
+    if (unref(seedList)[index] && unref(seedList)[index].length < 1) {
+        text = ''
+    }
+    return text
+}
+// 计算 每月可选 optional
+const monthItemOptional = (index) => {
+    let text = ''
+    if (unref(monthSeleList)[index]) {
+        text = `可选 : ${unref(monthSeleList)[index].cultivable - unref(monthSeleList)[index].selected}`
+    }
+    return text
+}
+// 修改  可选
+const editOptional = (index, type) => {
+    const day = daysUntilMonthEnd(); // 获取本月剩余天数
+    let result
+    const currentMonth = new Date().getMonth() + 1;
+    // = getEndDateMonth(index, totalDays)
+
+    // // 遍历已选择的蔬菜对象列表
+    for (let seed in unref(seedList)) {
+        unref(seedList)[seed].forEach((item) => {
+            if (seed === index) {
+                let totalDays = day + item.planting_cycle;
+                result = getEndDateMonth(index, totalDays)
+            }
+        })
+    }
+    for (let monthIndex in unref(monthSeleList)) {
+        // 如果该月份不等于当前选中蔬菜对象的索引
+        console.log(result, monthIndex, index);
+        if (Number(index) > result) {
+            if (Number(monthIndex) <= result) {
+                console.log(monthIndex);
+                if (type === 'del') {
+                    monthSeleList.value[monthIndex].selected--
+                } else if (type === 'add') {
+                    monthSeleList.value[monthIndex].selected++;
+                }
+            }
+        } else {
+            if (Number(monthIndex) >= result) {
+                if (type === 'del') {
+                    monthSeleList.value[monthIndex].selected--
+                } else if (type === 'add') {
+                    monthSeleList.value[monthIndex].selected++;
+                }
+            }
+        }
+    }
+}
+
+// 周期 辅助函数
+const getEndDateMonth = (currentMonth, totalDays) => {
+    const today = new Date(); // 获取当前日期
+    const currentYear = today.getFullYear(); // 获取当前年份
+    const currentMonthIndex = today.getMonth() + 1; // 获取当前月份（注意月份从 0 开始，所以要加 1）
+
+    let targetMonth = currentMonth; // 目标月份初始化为传入的参数值
+    console.log(currentMonth);
+    // 判断传入的月份是否小于当前月份，如果是，则目标月份位于下一年份
+    // if (currentMonth < currentMonthIndex) {
+    //     targetMonth += 12; // 加上 12 个月，即为下一年份的月份
+    // }
+
+    // 获取目标日期的年份和月份
+    const targetYear = currentYear + Math.floor((targetMonth - 1) / 12); // 注意这里要减去1，否则会多算一年
+    const remainingMonths = (targetMonth - 1) % 12 + 1; // 这里要加 1，才能得到正确的月份
+
+    // 构建目标日期对象
+    const targetDate = new Date(targetYear, remainingMonths - 1, 1); // 注意这里要减去 1，因为月份从 0 开始
+
+    // 计算目标日期后推总天数后的日期
+    targetDate.setDate(targetDate.getDate() + totalDays);
+
+    // 获取推算后的日期的月份
+    const endDateMonth = targetDate.getMonth() + 1; // 注意这里要加 1，才能得到正确的月份
+
+    return endDateMonth;
+};
+
 // 底部已选
 const openSeleList = () => {
-    if (Object.keys(seedList.value).length > 0) {
+    if (seedLength.value > 0) {
         seedIndexList.value = [];
-        indexBootomList.value = {};
         for (let key in seedList.value) {
-            if (seedList.value.hasOwnProperty(key)) {
+            console.log(seedList.value[key]);
+            if (seedList.value[key] && seedList.value[key].length > 0) {
                 seedIndexList.value.push(key)
             }
         }
@@ -236,7 +333,6 @@ const addSeed = () => {
         })
         return arr;
     }, []);
-    console.log(product);
     http.post("addPro", {
         farm_plot_id: curFarmPlot.value.farm_plot_id,
         product: JSON.stringify(product),
@@ -264,16 +360,19 @@ const formattedIndex = (index) => {
 };
 // 计算徽标 已选计算函数
 const seedListSet = (item, envnt, index) => {
+    console.log(unref(monthSeleList)[index]);
+    if (unref(monthSeleList)[index].selected === unref(monthSeleList)[index].cultivable) {
+        return
+    }
     // 检查 seedList 是否具有指定月份的键
     if (unref(seedList).hasOwnProperty(index)) {
         // 查找是否已经有相同的种子项
         const existingSeedIndex = unref(seedList)[index].findIndex(seed => seed.farm_product_id === item.farm_product_id);
         if (existingSeedIndex > -1) {
             // 如果存在相同的种子项，则从数组中删除该项
+            editOptional(index, 'del')
             unref(seedList)[index].splice(existingSeedIndex, 1);
-            console.log(`删除 ${item.product_name}`);
             seedLength.value--
-            console.log(unref(seedList)[index], seedIndexList);
             if (unref(seedList)[index].length === 0) {
                 seedIndexList.value = seedIndexList.value.filter((i) => i !== index);
             }
@@ -290,8 +389,9 @@ const seedListSet = (item, envnt, index) => {
     }
     unref(seedList)[index].push(item);
     seedLength.value++;
+    editOptional(index, 'add')
     addToCart(item, event, index)
-    console.log(`添加 ${item.product_name}`, seedList);
+    console.log(`添加 ${item.product_name}`);
 };
 
 // 是否存在
@@ -328,7 +428,24 @@ const getMonths = () => {
         initBtn.value = true;
     }, 400);
 };
-
+// 距离月底最后一天
+const daysUntilMonthEnd = (targetMonth) => {
+    if (targetMonth === undefined) {
+        // 如果没有传入目标月份，则计算本月剩余天数
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1;
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        const remainingDays = lastDay - currentDate.getDate();
+        return remainingDays;
+    } else {
+        // 如果传入了目标月份，则计算指定月份有多少天
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const lastDay = new Date(year, targetMonth + 1, 0).getDate();
+        return lastDay;
+    }
+}
 // 搜索操作
 const onSearch = (val) => {
     init(val);
@@ -337,7 +454,6 @@ const onSearch = (val) => {
 
 // 获取我已经有的种子
 const getMySeed = () => {
-    // const { data } = await http.post('myfarm')
     http.post("myobtPro", {
         farm_plot_id: mainStor.curFarmPlot.farm_plot_id,
     }).then((res) => {
@@ -346,62 +462,67 @@ const getMySeed = () => {
         } else {
             farmList.value = [];
         }
-        // initBtn.value = true;
     });
 };
 
 // 初始化
 const init = async (val) => {
     load.show();
-    nextTick();
-    // 清空之前的索引列表和分组数据
+
     indexList.value = [];
-    seedList.value = [];
+    seedList.value = {};
     indexedSeedList.value = {};
+
     const { data } = await http.post("obtPro", {
         planting_month: "",
         search: val ? val : "",
     });
-    console.log(data);
-    // 根据索引分组数据
-    data.forEach((item) => {
+    const monthSele = await http.post("monSele", {
+        farm_plot_id: curFarmPlot.value.farm_plot_id,
+    });
+
+    for (const item of data) {
         const months = item.planting_month.split(',');
-        months.forEach((month) => {
-            month = formattedIndex(month);
+        for (const month of Array.from(months, formattedIndex)) {
             if (!indexedSeedList.value[month]) {
                 indexedSeedList.value[month] = [];
                 indexList.value.push(month);
             }
             indexedSeedList.value[month].push(item);
+        }
+    }
+    indexList.value = sortIndexList(indexList.value);
+    const monthMapold = new Map();
+    unref(indexList).forEach(val => {
+        monthSele.data.forEach(month => {
+            if (formattedIndex(month.month) === val) {
+                monthMapold.set(formattedIndex(month.month), month);
+            }
+            monthSeleList.value[formattedIndex(month.month)] = month
         });
     });
-
-    // 对 indexList 进行排序
-    indexList.value = sortIndexList(indexList.value);
+    monthMap = monthMapold
+    console.log(indexList.value, monthSeleList, monthMap);
     load.hide();
 };
 
 const sortIndexList = (list) => {
+    const [curMonthFirst, ...curMonthRest] = curMonthList.value;
     list.sort((a, b) => {
-        if (a === curMonthList.value[0]) {
+        if (a === curMonthFirst) {
             return -1;
-        } else if (b === curMonthList.value[0]) {
+        } else if (b === curMonthFirst) {
             return 1;
         } else {
-            let aIndex = curMonthList.value.indexOf(a);
-            let bIndex = curMonthList.value.indexOf(b);
-            if (aIndex === -1) {
-                aIndex = parseInt(a);
-            }
-            if (bIndex === -1) {
-                bIndex = parseInt(b);
-            }
-            return aIndex - bIndex;
+            const aIndex = curMonthRest.indexOf(a);
+            const bIndex = curMonthRest.indexOf(b);
+            return aIndex === -1 || bIndex === -1 ? Number(a) - Number(b) : aIndex - bIndex;
         }
     });
 
     return list;
 };
+
 
 onMounted(() => {
     getMonths();

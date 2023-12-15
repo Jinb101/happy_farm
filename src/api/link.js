@@ -48,6 +48,9 @@ const MainApi = {
   foodMark: "farm/index/FoodMarket",
   // : 接口：菜市菜地熟菜列表
   cooked: "farm/index/CookedVegetables",
+
+  // : 接口：每月可选
+  monSele: "farm/user/MonthlyStatistics",
 };
 
 export { TouristApi, MainApi };
