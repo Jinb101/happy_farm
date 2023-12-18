@@ -32,6 +32,8 @@ const MainApi = {
   obtPro: "farm/common/ObtainingProducts",
   // : 获取我的产品---我的种子列表
   myobtPro: "farm/user/ObtainLandParcelProducts",
+  // : 删除地块蔬菜---删除地块蔬菜
+  deletProu: "farm/user/DeleteProduct",
 
   // :  获取家庭成员
   family: "farm/user/familyMembers",

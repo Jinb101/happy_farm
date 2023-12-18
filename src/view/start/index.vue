@@ -215,35 +215,24 @@ const is_weixn = () => {
 // 获取月份
 const getCurMonthList = () => {
     const curDate = new Date(); // 当前日期
-    const curMonth = curDate.getMonth(); // 当前月份
-    const curDay = curDate.getDate(); // 当前日期中的天数
+    let curYear = curDate.getFullYear(); // 当前年份
+    let curMonth = curDate.getMonth() + 1; // 当前月份
 
     const monthList = []; // 存储月份的列表
 
     for (let i = 0; i < 12; i++) {
-        let targetMonth = curMonth + i;
-        let targetYear = curDate.getFullYear();
-
-        // 如果当前月份已经过了10天，则往后推12个月
-        if (curDay > 15 && i === 0) {
-            targetMonth++;
+        if (curMonth > 12) {
+            curMonth = 1;
+            curYear++;
         }
 
-        // 处理月份超出 12 的情况
-        if (targetMonth >= 12) {
-            targetMonth -= 12;
-            targetYear++;
-        }
+        monthList.push({ year: curYear, month: curMonth });
 
-        // 格式化索引
-        const index = (targetMonth + 1).toString().padStart(2, '0'); // 修改此处
-
-        const targetDate = new Date(targetYear, targetMonth);
-        monthList.push(index);
+        curMonth++;
     }
 
     return monthList;
-}
+};
 
 // 初始化
 const init = (e) => {
@@ -279,6 +268,7 @@ const init = (e) => {
             load.clear()
         })
         console.log(mainStor);
+        console.log(mainStor.curMonthList);
     })
 }
 
