@@ -16,6 +16,25 @@
             </van-swipe-item>
         </van-swipe>
 
+        <div class=" w-full h-[70%] pt-4 ">
+            <van-list v-model:loading="loading"
+                      :finished="finished"
+                      finished-text="没有更多了"
+                      :offset="200"
+                      @load="onLoad">
+                <div class=" w-[40%] h-[6rem] bg-gray-100 mb-6"
+                     v-for=" item in list"
+                     @click="viewItem(item)">
+                    <div class=" h-1/4 w-full bg-gray-200 flex justify-between items-center px-2">
+                        <span class=" text-xs">{{ item.parent }}</span>
+                        <van-icon color="yellow"
+                                  name="shop-collect-o" />
+                    </div>
+                    <div></div>`
+                </div>
+            </van-list>
+        </div>
+
 
 
         <div class=" absolute bottom-8 w-full h-[10%] flex justify-center items-center">
@@ -101,6 +120,17 @@ const http = inject("http")
 const load = inject("load")
 const wxTools = inject("wxTools");
 
+
+
+const list = ref([
+]);
+const loading = ref(false);
+const finished = ref(false);
+
+const paging = ref({
+    page: 1,
+    limit: 10
+})
 // 轮播
 const bannerLists = ref([])
 // 去购买
@@ -120,22 +150,24 @@ const priceNameList = ref({
     three_years: '三年价格',
     four_years: '四年价格',
 })
-// 轮播
-const fetchData = async () => {
-    load.show()
-    try {
-        const { data } = await http.post('getPrice')
-        const response = await http.get('banner', {
-            banner_type: 2
-        }) // 使用封装的 get 请求
-        bannerLists.value = response.data.map((i) => !i.is_show)
-        priceList.value = data
-    } catch (error) {
-        console.error(error)
+
+
+
+// 滚动触底
+const onLoad = (type) => {
+    if (finished.value) {
+        return
     }
-    load.hide();
-    move.value = true;
+    if (!type) {
+        unref(paging).page++
+    }
+    getNatur()
+    loading.value = false;
 }
+
+
+
+
 
 // 地块 id
 const farm_id = ref('')
@@ -155,6 +187,7 @@ const onPriceItem = async (index) => {
                 // 订单 ID
                 const payScribe = await http.post('subscribe', {
                     // farm_id: 1,
+                    // farm_classroom_id: 1,
                     purchase_type: index
                 })
                 farm_id.value = payScribe.data
@@ -188,6 +221,37 @@ const onPriceItem = async (index) => {
 
     }
 }
+
+// 课程
+const getNatur = async () => {
+    const { data } = await http.post('natur', {
+        ...paging.value,
+    })
+    if (data.length === 0) {
+        finished.value = true;
+        return
+    }
+
+}
+
+// 轮播
+const fetchData = async () => {
+    load.show()
+    try {
+        getNatur()
+        const { data } = await http.post('getPrice')
+        const response = await http.get('banner', {
+            banner_type: 2
+        }) // 使用封装的 get 请求
+        bannerLists.value = response.data.map((i) => !i.is_show)
+        priceList.value = data
+    } catch (error) {
+        console.error(error)
+    }
+    load.hide();
+    move.value = true;
+}
+
 
 // 初始化 定义状态
 const init = (e) => {

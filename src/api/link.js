@@ -10,6 +10,8 @@ const MainApi = {
   banner: "farm/index/banner",
   // :自然课程列表
   natur: "farm/index/NaturalCourses",
+  // :自然课程详情
+  naturCour: "farm/index/NaturalCourses",
   // : 生成认购订单
   subscribe: "farm/user/subscribe",
   // : 微信配置信息

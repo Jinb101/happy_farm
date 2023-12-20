@@ -105,7 +105,6 @@ const getFoodMark = async (id, val) => {
         return
     }
     list.value = [...list.value, ...data];
-    console.log(list);
 }
 
 const init = () => {
