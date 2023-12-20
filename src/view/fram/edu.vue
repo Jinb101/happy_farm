@@ -125,7 +125,9 @@ const fetchData = async () => {
     load.show()
     try {
         const { data } = await http.post('getPrice')
-        const response = await http.get('banner') // 使用封装的 get 请求
+        const response = await http.get('banner', {
+            banner_type: 2
+        }) // 使用封装的 get 请求
         bannerLists.value = response.data.map((i) => !i.is_show)
         priceList.value = data
     } catch (error) {

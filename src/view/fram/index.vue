@@ -99,7 +99,9 @@ const openMas = (data) => {
 
 const fetchData = async () => {
     try {
-        const response = await http.get('banner')
+        const response = await http.get('banner', {
+            banner_type: 1
+        })
         bannerLists.value = response.data.map((i) => !i.is_show)
     } catch (error) {
         console.error(error)
