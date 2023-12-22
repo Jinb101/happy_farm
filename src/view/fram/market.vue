@@ -83,16 +83,16 @@ const getData = () => {
         })
         .then((res) => {
             let obj = {
-                "farm_cooked_food_id": "熟菜id",
-                "farm_plot_id": "地块id",
-                "farm_product_id": "菜品id",
+                "farm_cooked_food_id": "熟菜 id",
+                "farm_plot_id": "地块 id",
+                "farm_product_id": "菜品 id",
                 "estimated_quantity": "预估数量",
                 "remaining_quantity": "剩余数量",
                 "picking_start_time": "采摘开始时间",
                 "picking_end_time": "采摘结束时间",
                 "create_time": "创建时间",
                 "FarmProduct": [{//菜品信息
-                    "farm_product_id": "菜品id",
+                    "farm_product_id": "菜品 id",
                     product_name: '菜品名称',
                     price: '价格'
                 }]

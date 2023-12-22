@@ -9,7 +9,7 @@ const routesConfig = [
   // 动态添加的路由配置对象
   // path, component,name,title,footer,header,header_right
   ["/login", "login/index.vue", "login", "登录", false, false],
-  ["/fram", "fram/index.vue", "fram", "云土地", true, false],
+  ["/fram", "fram/index.vue", "fram", "云土地", true, false, true],
   ["/har", "har/index.vue", "har", "菜市", true, false],
   ["/seed", "fram/seed.vue", "seed", "种子列表", false, true],
   ["/veg", "fram/veg.vue", "veg", "我的蔬菜", false, true],

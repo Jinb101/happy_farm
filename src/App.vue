@@ -1,9 +1,10 @@
 <script setup>
 import './style.css'
 import { defineAsyncComponent, inject, onMounted } from 'vue';
-import { RouterView } from 'vue-router';
+import { RouterView, useRoute } from 'vue-router';
 import Loading from '@/components/loading/index.vue'
 
+const route = useRoute()
 const AsyncRouterView = defineAsyncComponent(() => import('vue-router').then(m => m.RouterView));
 
 const http = inject("http");
@@ -25,7 +26,7 @@ onMounted(() => {
         <transition>
             <shell>
                 <Loading />
-                <AsyncRouterView>
+                <AsyncRouterView :key="route.path">
 
                 </AsyncRouterView>
 

@@ -33,7 +33,10 @@
             </div>
         </div>
         <div class=" h-1/3 w-full rounded-t-lg shadow-inner shadow-slate-300">
-            <FarmModel @masDeta="openMas" />
+            <keep-alive>
+                <FarmModel :key="route.path"
+                           @masDeta="openMas" />
+            </keep-alive>
         </div>
     </div>
 </template>
@@ -46,6 +49,7 @@ import { storeToRefs } from 'pinia'
 import FarmModel from '@/view/fram/model.vue'
 
 const router = useRouter();
+const route = useRoute();
 const mainStor = useMainStore()
 const { status, curFarmPlot, wherWx } = storeToRefs(mainStor)
 const http = inject("http")
