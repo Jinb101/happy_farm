@@ -1,6 +1,6 @@
 <template>
     <div class=" h-full w-full  relative">
-        <van-swipe class="my-swipe h-[30%] w-full"
+        <van-swipe class="my-swipe h-[30%] w-full border-b border-gray-100"
                    :autoplay="3000"
                    indicator-color="white">
             <van-swipe-item v-for="(imgs, index) in bannerLists"
@@ -16,22 +16,31 @@
             </van-swipe-item>
         </van-swipe>
 
-        <div class=" w-full h-[70%] pt-4 ">
+        <div class=" w-full h-[70%] pt-4 bg-slate-50 ">
             <van-list v-model:loading="loading"
                       :finished="finished"
+                      :immediate-check="false"
                       finished-text="没有更多了"
                       :offset="200"
                       @load="onLoad">
-                <div class=" w-[40%] h-[6rem] bg-gray-100 mb-6"
-                     v-for=" item in list"
-                     @click="viewItem(item)">
-                    <div class=" h-1/4 w-full bg-gray-200 flex justify-between items-center px-2">
-                        <span class=" text-xs">{{ item.parent }}</span>
-                        <van-icon color="yellow"
-                                  name="shop-collect-o" />
+
+                <van-radio-group v-model="checked">
+                    <div class=" w-[90%] h-[8rem] flex justify-between px-4 py-2 items-start rounded-2xl  shadow-xl bg-white mx-auto my-2"
+                         v-for=" item in list">
+                        <div class=" h-full w-2/3 flex flex-col justify-between items-start   ">
+                            <span>{{ item.title }}</span>
+                            <img :src="imgUrl(item) || 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg'"
+                                 alt=""
+                                 class=" w-full h-[70%]"
+                                 srcset="">
+                            <div>123</div>
+                        </div>
+                        <div class="">
+                            <van-radio :name="item.farm_classroom_id"></van-radio>
+                        </div>
                     </div>
-                    <div></div>`
-                </div>
+                </van-radio-group>
+
             </van-list>
         </div>
 
@@ -46,7 +55,7 @@
                                 icon-position="right"
                                 icon="hot-o"
                                 class="right_icon btn-show"
-                                @click="showBottom = true"
+                                @click="openPay"
                                 style="height: 100%;background-color: #14cd3f96;color:white;"
                                 type="info">解锁我的土地</van-button>
                 </div>
@@ -108,7 +117,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, inject } from 'vue'
+import { onMounted, ref, inject, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import { useMainStore } from '@/store/index.js'
 import { storeToRefs } from 'pinia'
@@ -126,7 +135,8 @@ const list = ref([
 ]);
 const loading = ref(false);
 const finished = ref(false);
-
+// 单选
+const checked = ref();
 const paging = ref({
     page: 1,
     limit: 10
@@ -151,7 +161,12 @@ const priceNameList = ref({
     four_years: '四年价格',
 })
 
-
+// 图片 url
+const imgUrl = (item) => {
+    // 获取本机地址
+    const localAddress = window.location.origin + item.cover_picture;
+    console.log(localAddress, window.location);
+}
 
 // 滚动触底
 const onLoad = (type) => {
@@ -165,6 +180,14 @@ const onLoad = (type) => {
     loading.value = false;
 }
 
+// 解锁土地
+const openPay = () => {
+    if (!checked.value) {
+        load.info('请选择课程')
+        return
+    }
+    showBottom.value = true
+}
 
 
 
@@ -187,7 +210,7 @@ const onPriceItem = async (index) => {
                 // 订单 ID
                 const payScribe = await http.post('subscribe', {
                     // farm_id: 1,
-                    // farm_classroom_id: 1,
+                    // farm_classroom_id: unref(checked),
                     purchase_type: index
                 })
                 farm_id.value = payScribe.data
@@ -229,8 +252,8 @@ const getNatur = async () => {
     })
     if (data.length === 0) {
         finished.value = true;
-        return
     }
+    list.value = data
 
 }
 

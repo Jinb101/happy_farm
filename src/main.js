@@ -55,6 +55,8 @@ import {
   Tab,
   BackTop,
   Tabs,
+  RadioGroup,
+  Radio,
 } from "vant";
 
 const app = createApp(App);
@@ -98,6 +100,8 @@ app.use(Progress);
 app.use(Tab);
 app.use(Tabs);
 app.use(BackTop);
+app.use(Radio);
+app.use(RadioGroup);
 
 app.use(pinia).use(router);
 

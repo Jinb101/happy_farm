@@ -7,7 +7,8 @@
              class="h-full w-full px-4 overflow-y-auto ">
             <van-list v-model:loading="listLoading"
                       :finished="finished"
-                      offset="10"
+                      :immediate-check="false"
+                      :offset="100"
                       finished-text="没有更多了"
                       @load="onLoad">
                 <van-skeleton title
@@ -38,7 +39,7 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeMount, inject, ref, unref, watch } from 'vue';
+import { onMounted, onBeforeMount, inject, ref, unref, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useMainStore } from '@/store/index.js'
 import { storeToRefs } from 'pinia'
@@ -51,6 +52,7 @@ const { user, access_token, nursery_id, wherWx, farmPlotList, curFarmPlot } = st
 const http = inject("http");
 const Tools = inject("Tools");
 const load = inject("load");
+
 
 const loading = ref(true);
 const listLoading = ref(false);
@@ -74,68 +76,58 @@ const onLoad = () => {
     listLoading.value = false;
 };
 
-//监听当前 土地id
+//监听当前 土地 id
 watch(
     () => unref(curFarmPlot).farm_plot_id,
     (va) => {
-        getData()
+        if (va) {
+            getData()
+        }
     }
 )
 
 
-const getData = () => {
+const getData = async () => {
     load.show();
-    console.log(curFarmPlot);
-    http
+    const res = await http
         .post("cooked", {
             farm_plot_id: unref(curFarmPlot).farm_plot_id,
             ...unref(pageIng)
         })
-        .then((res) => {
-            let obj = {
-                "farm_cooked_food_id": "熟菜id",
-                "farm_plot_id": "地块id",
-                "farm_product_id": "菜品id",
-                "estimated_quantity": "预估数量",
-                "remaining_quantity": "剩余数量",
-                "picking_start_time": "采摘开始时间",
-                "picking_end_time": "采摘结束时间",
-                "create_time": "创建时间",
-                "FarmProduct": [{//菜品信息
-                    "farm_product_id": "菜品id",
-                    product_name: '菜品名称',
-                    price: '价格'
-                }]
-            }
-            for (let i = 0; i < 20; i++) {
-                framList.value.push(obj)
-            }
-            if (res.data.length === 0) {
-                finished.value = true;
-            } else {
-                framList.value.push(...res.data);
-            }
-            console.log(res);
-            load.hide();
-            setTimeout(() => {
-                loading.value = false;
-            }, 600);
-        })
-        .catch((error) => {
-            console.error(error);
-            // 处理错误情况
-        });
 
+    let obj = {
+        "farm_cooked_food_id": "熟菜 id",
+        "farm_plot_id": "地块 id",
+        "farm_product_id": "菜品 id",
+        "estimated_quantity": "预估数量",
+        "remaining_quantity": "剩余数量",
+        "picking_start_time": "采摘开始时间",
+        "picking_end_time": "采摘结束时间",
+        "create_time": "创建时间",
+        "FarmProduct": [{//菜品信息
+            "farm_product_id": "菜品 id",
+            product_name: '菜品名称',
+            price: '价格'
+        }]
+    }
+    for (let i = 0; i < 20; i++) {
+        framList.value.push(obj)
+    }
+    if (res.data.length === 0) {
+        finished.value = true;
+    } else {
+        framList.value.push(...res.data);
+    }
+    load.hide();
+    setTimeout(() => {
+        loading.value = false;
+    }, 600);
 
 };
 
-const init = () => {
-    loading.value = true;
-    getData();
-};
 
 onMounted(() => {
-    init();
+    getData();;
 });
 
 </script>
