@@ -58,6 +58,9 @@ const MainApi = {
   addPath: "farm/user/addAddress",
   // :  添加家庭地址
   deletPath: "farm/user/deleteAddress",
+
+  // :  邮费计算
+  postage: "farm/order/PurchaseAmount",
 };
 
 export { TouristApi, MainApi };

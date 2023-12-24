@@ -17,10 +17,7 @@
                               v-for="(item, index) in framList"
                               :key="index + 'fram'"
                               :loading="loading">
-                    <div style="
-                box-shadow: 0 3.2px 12px #00000014, 0 5px 25px #0000000a;
-              "
-                         class="  flex justify-center items-center w-full rounded-xl px-2 py-4 mt-4">
+                    <div class="show_container  flex justify-center items-center w-full rounded-xl px-2 py-4 mt-4">
                         <ProductItem :url="item.url ? item.url : 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'"
                                      :text="item.product_name" />
                         <div class="flex justify-between items-center w-[90%]">
@@ -74,6 +71,8 @@
                                              min=""
                                              input-width="24px"
                                              button-size="26px"
+                                             @plus="editPer(item, index, 'plus')"
+                                             @minus="editPer(item, index, 'minus')"
                                              :max="Number(item.remaining_quantity)" />
                             </div>
                         </div>
@@ -81,8 +80,8 @@
                 </van-skeleton>
             </van-list>
 
-            <div
-                 class=" fixed right-5 bottom-[10vh] flex flex-col bg-zinc-100 py-4 px-2 rounded-2xl transition-all duration-500">
+            <div :class="seleItem.length > 0 ? 'right-5 bottom-[10vh] ' : 'right-[-10vh] bottom-[10vh]'"
+                 class="show_container fixed flex flex-col bg-white py-4 px-2 rounded-2xl transition-all duration-500">
                 <van-button class="listed"
                             @click="Operation('l', item, index)"
                             type="warning">上市</van-button>
@@ -95,6 +94,87 @@
                           :style="{ backgroundColor: ' rgb(147 197 253)' }"
                           bottom="12vh" />
         </div>
+
+        <van-popup v-model:show="showBottom"
+                   round
+                   closeable
+                   position="bottom"
+                   :style="{ minHeight: '60%' }">
+            <div class=" pt-[15%] pb-14">
+                <div v-if="currentType == 'd'"
+                     class="w-full text-left  px-4 bg-slate-50 h-8 flex justify-between items-center">
+                    <span>地址 : </span>
+                    <span>预计邮费 : {{ postage }} 元</span>
+                </div>
+                <div v-if="currentType == 'd'"
+                     class="  h-[6rem] w-full  px-4  flex justify-start items-center "
+                     @click="selePath = true">
+                    <div class=" h-[90%]  flex flex-col justify-center items-start  w-[80%] ">
+                        <div class=" w-1/2 h-1/2 flex justify-between items-center">
+                            <span>{{ currentPath.consignee }}</span>
+                            <span>{{ currentPath.mobile }}</span>
+                        </div>
+                        <div class=" address_text h-1/2 text-left mt-1 subpixel-antialiased   ">
+                            <p>{{ currentPath.address }}</p>
+                        </div>
+                    </div>
+                    <div class=" flex justify-end items-center  w-[20%] h-full py-4">
+                        <van-icon name="arrow" />
+                    </div>
+                </div>
+                <div class="w-full text-left  px-4 bg-slate-50 h-8 flex justify-start items-center">已选蔬菜：</div>
+                <div class=" overflow-y-auto w-full">
+                    <div v-for="veg in seleItem"
+                         class="flex justify-between items-center px-4 border-b border-gray-100"
+                         :key="veg.farm_product_id">
+                        <div class=" w-1/2 h-14  flex justify-start items-center">
+                            <ProductItem :url="veg.url ? veg.url : ''"
+                                         :text="veg.product_name" />
+                            <span v-if="veg.url"
+                                  class=" ml-4">{{ veg.product_name }}</span>
+                        </div>
+                        <div>
+                            {{ veg.num + ' 斤' }}
+                        </div>
+                    </div>
+                </div>
+                <div class=" w-full h-14 absolute left-0 bottom-0 px-10">
+                    <van-button type="primary"
+                                block>{{ currentType == 'l' ? '上市!' : '确认发货' }}</van-button>
+                </div>
+            </div>
+        </van-popup>
+
+
+
+        <van-popup v-model:show="selePath"
+                   round
+                   closeable
+                   :overlay="false"
+                   position="bottom"
+                   :style="{ minHeight: '60%' }">
+            <div class=" pt-[15%] ">
+                <van-radio-group v-model="currentPath">
+                    <div v-for="(item, index) in pathList"
+                         :key="item.user_id"
+                         class="  h-[6rem] w-full  flex justify-start items-center px-4 border-b ">
+                        <div class=" h-[90%] ml-4 flex flex-col justify-center items-start  w-[80%] ">
+                            <div class=" w-1/2 h-1/2 flex justify-between items-center">
+                                <span>{{ item.consignee }}</span>
+                                <span>{{ item.mobile }}</span>
+                            </div>
+                            <div class=" address_text h-1/2 text-left mt-1 subpixel-antialiased   ">
+                                <p>{{ item.address }}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <van-radio :name="item"></van-radio>
+                        </div>
+                    </div>
+                </van-radio-group>
+            </div>
+        </van-popup>
+
     </div>
 </template>
 
@@ -108,6 +188,7 @@ import ProductItem from "@/components/product/ProductItem.vue";
 const mainStor = useMainStore()
 const { curFarmPlot } = storeToRefs(mainStor)
 
+const router = useRouter()
 
 const http = inject("http");
 const Tools = inject("Tools");
@@ -119,29 +200,76 @@ const listLoading = ref(false);
 const finished = ref(false);
 const framList = ref([]);
 
+
+const selePath = ref(false);
+// seleItem
+const seleItem = ref([])
+// 地址选中
+const showBottom = ref(false);
 // 分页
 const pageIng = ref({
     page: 1,
     limit: 10
 });
-
+// 地址
+const pathList = ref([]);
+const currentPath = ref({});
+const currentType = ref('');
+// 邮费
+const postage = ref();
 
 
 
 // 操作
 const Operation = (type, item, index) => {
+    currentType.value = type
     switch (type) {
         case 'l':
             // 上市
+            showBottom.value = true
             break;
         case 'd':
             // 发货
+            if (pathList.value.length < 1) {
+                load.model('是否前往地址铺新增地址', (r) => {
+                    if (r) {
+                        router.push('/path')
+                    }
+                })
+                return
+            }
+            console.log(seleItem);
+            const farm_stall = seleItem.value.map(item => {
+                return {
+                    farm_stall_id: item.farm_plot_id,
+                    number: item.num
+                };
+            });
+            http.post('postage', {
+                farm_stall: JSON.stringify(farm_stall),
+                farm_address_id: currentPath.value.farm_address_id
+            }).then((res) => {
+                console.log(res);
+                postage.value = res.data.amount
+                // postage.value = res.freight
+                showBottom.value = true
+            })
             break;
 
         default:
             break;
     }
 }
+
+//
+const editPer = (item, index, type) => {
+    if (type === 'plus') {
+        seleItem.value[index] = item;
+    } else if (type === 'minus') {
+        seleItem.value.splice(index, 1);
+    }
+}
+
 
 
 // 时间格式
@@ -170,8 +298,21 @@ watch(
         }
     }
 )
+// 地址数据
+const getPaht = async () => {
+    const { data } = await http.post('familyPath', {
+        page: 1,
+        limit: 999,
+    })
+    pathList.value = data
+    currentPath.value = data.find((i) => {
+        return i.is_default === '1';
+    });
+    console.log(currentPath);
+    load.hide()
+}
 
-
+// 蔬菜数据
 const getData = async () => {
     load.show();
     const { data } = await http
@@ -188,16 +329,26 @@ const getData = async () => {
         console.log(data);
         framList.value.push(...data);
     }
-    load.hide();
     setTimeout(() => {
         loading.value = false;
     }, 600);
 
 };
 
+watch(
+    () => showBottom.value,
+    (v) => {
+        if (!v) {
+            selePath.value = v
+        }
+    }
+)
+
+
 
 onMounted(() => {
-    getData();;
+    getData();
+    getPaht()
 });
 
 </script>
@@ -210,5 +361,9 @@ onMounted(() => {
 :deep(.deliv) {
     margin-top: 10px;
     font-size: 12px;
+}
+
+.show_container {
+    box-shadow: 0 3.2px 12px #00000014, 0 5px 25px #0000000a;
 }
 </style>

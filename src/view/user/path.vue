@@ -46,10 +46,8 @@
                                       color="#c8c9cc"
                                       name="close" />
                         </div>
-
                     </div>
                 </van-list>
-
 
             </div>
             <div class=" h-[8%] w-full px-6">
@@ -186,7 +184,7 @@ const onDelet = (item, index) => {
     })
 };
 
-// 地址json
+// 地址 json
 const pathJson = ref(null)
 // 地址控制器
 const pathShow = ref(false)
@@ -247,7 +245,7 @@ const onSubmit = async (values) => {
 
 
 
-// 地址json 处理
+// 地址 json 处理
 const appDataCity = (name = "text") => {
     let c = city().map((s) => {
         s[name] = s.n;
@@ -263,7 +261,7 @@ const appDataCity = (name = "text") => {
     });
     return c;
 }
-// 地址json 处理
+// 地址 json 处理
 let city = (ids = [], type) => {
     if (!ids.length) return citysJson
     if (ids.length === 3) {
