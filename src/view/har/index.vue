@@ -20,6 +20,7 @@
                       :finished="finished"
                       finished-text="没有更多了"
                       :offset="200"
+                      :immediate-check="false"
                       @load="onLoad">
                 <div class=" w-[40%] h-[6rem] bg-gray-100 mb-6"
                      v-for=" item in list"

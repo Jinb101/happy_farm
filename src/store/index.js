@@ -13,6 +13,8 @@ export const useMainStore = defineStore("main", {
     return {
       // 状态 1 购买 0 未购买
       status: 0,
+      // 微信基础信息
+      wxData: null,
       // 源
       type: "",
       // 用户信息

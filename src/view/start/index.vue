@@ -235,41 +235,43 @@ const getCurMonthList = () => {
 };
 
 // 初始化
-const init = (e) => {
-    load.loading('', true)
-    Tools.getUrlParam('h5').then((value) => {
-        if (!value) {
-            return
+
+const init = async (e) => {
+    try {
+        load.loading('', true);
+        const h5Param = await Tools.getUrlParam('h5');
+        if (!h5Param) {
+            return;
         }
-        let wherWx = is_weixn()
-        const params = Tools.decrypt(value)
+        let wherWx = is_weixn();
+        const params = Tools.decrypt(h5Param);
         console.log(params);
-        mainStor.access_token = params.data.access_token
-        mainStor.nursery_id = 0
+        mainStor.access_token = params.data.access_token;
+        mainStor.nursery_id = 0;
         Tools.storage('s', 'set', 'Basics', {
             access_token: params.data.access_token,
             n_id: 0,
             user: params.data
-        })
-        mainStor.user = params.data
-        mainStor.type = params.type
-        mainStor.curMonthList = getCurMonthList()
-        mainStor.wherWx = wherWx
-        mainStor.curActive = 0
-        http.post('myfarm').then((r) => {
-            const { data } = r
-            console.log(data);
-            mainStor.farmPlotList = data
-            mainStor.status = data.length === 0 ? 0 : 1
-            if (data.length > 0) {
-                mainStor.curFarmPlot = data[0]
-            }
-            router.replace('/fram')
-            load.clear()
-        })
-        console.log(mainStor);
-        console.log(mainStor.curMonthList);
-    })
+        });
+        mainStor.user = params.data;
+        mainStor.type = params.type;
+        mainStor.curMonthList = getCurMonthList();
+        mainStor.wherWx = wherWx;
+        mainStor.curActive = 0;
+        const r = await http.post('myfarm');
+        const w = await http.post('getShare');
+        const { data } = r;
+        mainStor.farmPlotList = data;
+        mainStor.wxData = w.data;
+        mainStor.status = data.length === 0 ? 0 : 1;
+        if (data.length > 0) {
+            mainStor.curFarmPlot = data[0];
+        }
+        router.replace('/fram');
+        load.clear();
+    } catch (error) {
+        console.error('Error initializing:', error);
+    }
 }
 
 

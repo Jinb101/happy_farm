@@ -17,6 +17,7 @@
             <div class=" h-[92%] w-full px-2">
                 <van-list v-model:loading="loading"
                           :finished="finished"
+                          :immediate-check="false"
                           @load="onLoad">
                     <div v-for="(item, index) in pathList"
                          :key="item.user_id"

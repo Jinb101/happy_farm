@@ -4,7 +4,16 @@
             <van-empty description="暂无蔬菜" />
         </div>
         <div v-else
-             class="h-full w-full px-4 overflow-y-auto ">
+             class="h-full w-full px-4 overflow-y-auto relative ">
+            <div v-if="gifLoaded"
+                 class=" w-full h-full flex justify-center items-center  absolute left-0 top-0">
+                <van-overlay :show="gifLoaded"
+                             z-index="3000" />
+                <img ref="gif_d"
+                     class="gif_d z-[9999]"
+                     src="@/assets/images/train.gif">
+            </div>
+
             <van-list v-model:loading="listLoading"
                       :finished="finished"
                       :immediate-check="false"
@@ -61,7 +70,9 @@
                                     </div>
                                     <div class=" mt-1 ">
                                         <span>预估:{{ item.estimated_quantity }} 斤</span>
-                                        <span class="ml-4">剩余:{{ item.remaining_quantity }} 斤</span>
+                                        <span class="ml-4">剩余:{{ item.FarmStall ? (item.remaining_quantity * 1) -
+                                            (item.FarmStall.sales_quantity * 1) : item.remaining_quantity * 1
+                                        }} 斤</span>
                                     </div>
                                 </div>
                             </div>
@@ -124,11 +135,11 @@
                 </div>
                 <div class="w-full text-left  px-4 bg-slate-50 h-8 flex justify-start items-center">已选蔬菜：</div>
                 <div class=" overflow-y-auto w-full">
-                    <div v-for="veg in seleItem"
+                    <div v-for="(veg, index) in seleItem"
                          class="flex justify-between items-center px-4 border-b border-gray-100"
-                         :key="veg.farm_product_id">
+                         :key="index">
                         <div class=" w-1/2 h-14  flex justify-start items-center">
-                            <ProductItem :url="veg.url ? veg.url : ''"
+                            <ProductItem :url="''"
                                          :text="veg.product_name" />
                             <span v-if="veg.url"
                                   class=" ml-4">{{ veg.product_name }}</span>
@@ -140,40 +151,27 @@
                 </div>
                 <div class=" w-full h-14 absolute left-0 bottom-0 px-10">
                     <van-button type="primary"
+                                @click="confirm"
                                 block>{{ currentType == 'l' ? '上市!' : '确认发货' }}</van-button>
                 </div>
             </div>
         </van-popup>
 
 
+        <!-- <PaySeed :open="showBottom"
+                 :text="'已选蔬菜'"
+                 :list="seleItem"
+                 @close="showBottom = false"
+                 @subit="confirm">
+        </PaySeed> -->
+        <PathPay :open="selePath"
+                 :currentPath="currentPath"
+                 :pathList="pathList"
+                 @close="selePath = false"
+                 @changes="(e) => currentPath = e">
+        </PathPay>
 
-        <van-popup v-model:show="selePath"
-                   round
-                   closeable
-                   :overlay="false"
-                   position="bottom"
-                   :style="{ minHeight: '60%' }">
-            <div class=" pt-[15%] ">
-                <van-radio-group v-model="currentPath">
-                    <div v-for="(item, index) in pathList"
-                         :key="item.user_id"
-                         class="  h-[6rem] w-full  flex justify-start items-center px-4 border-b ">
-                        <div class=" h-[90%] ml-4 flex flex-col justify-center items-start  w-[80%] ">
-                            <div class=" w-1/2 h-1/2 flex justify-between items-center">
-                                <span>{{ item.consignee }}</span>
-                                <span>{{ item.mobile }}</span>
-                            </div>
-                            <div class=" address_text h-1/2 text-left mt-1 subpixel-antialiased   ">
-                                <p>{{ item.address }}</p>
-                            </div>
-                        </div>
-                        <div>
-                            <van-radio :name="item"></van-radio>
-                        </div>
-                    </div>
-                </van-radio-group>
-            </div>
-        </van-popup>
+
 
     </div>
 </template>
@@ -184,6 +182,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useMainStore } from '@/store/index.js'
 import { storeToRefs } from 'pinia'
 import ProductItem from "@/components/product/ProductItem.vue";
+import PathPay from "@/components/pay/PathPay.vue";
+import PaySeed from "@/components/pay/PaySeed.vue";
 
 const mainStor = useMainStore()
 const { curFarmPlot } = storeToRefs(mainStor)
@@ -200,6 +200,9 @@ const listLoading = ref(false);
 const finished = ref(false);
 const framList = ref([]);
 
+
+const gif_d = ref(null);
+const gifLoaded = ref(false);
 
 const selePath = ref(false);
 // seleItem
@@ -218,10 +221,95 @@ const currentType = ref('');
 // 邮费
 const postage = ref();
 
+// 确认
+const confirm = async () => {
+    load.show()
+    if (currentType.value === 'd') {
+        const selectedItems = seleItem.value.map(item => {
+            return {
+                farm_plot_products_id: item.farm_plot_products_id,
+                number: item.num
+            };
+        })
+        // 生成订单
+        const food = await http.post('deFood', {
+            farm_plot_products: JSON.stringify(selectedItems),
+            farm_address_id: currentPath.value.farm_address_id
+        });
+        // 支付订单
+        const payment = await http.post('delPay', {
+            order_id: food.data.farm_dish_orders_id,
+            order_no: food.data.order_no,
+            // open_id: mainStor.user.open_id
+        });
+        if (payment.code === 200) {
+            load.hide()
+            // 执行微信支付
+            await performWxPayment(payment.data);
+        } else if (payment.code === 280) {
+            load.hide()
+            playGif(payment.msg)
+            getData()
+        }
+        // 支付成功
+    } else {
+        console.log('上市');
+        const selectedItems = seleItem.value.map(item => {
+            return {
+                farm_plot_products_id: item.farm_plot_products_id,
+                sales_quantity: item.num
+            };
+        })
+        // 上市
+        http.post('sales', {
+            farm_plot_products: JSON.stringify(selectedItems),
+        }).then((res) => {
+            load.success(res.data.msg)
+            getData()
+        })
+    }
+}
+
+const performWxPayment = async (paymentData) => {
+    try {
+        // 调取微信支付
+        const res = await wxTools.seedWxPay({
+            appId: mainStor.user.open_id,
+            timestamp: paymentData.txntime,
+            nonceStr: paymentData.nonceStr,
+            signature: paymentData.sign,
+            signType: paymentData.signType,
+            paySign: paymentData.sign,
+        });
+        if (res.code === 208) {
+            // load.success('支付成功');
+            playGif(res.msg)
+        } else {
+            load.info('请刷新重试');
+        }
+
+    } catch (error) {
+        console.error('Error performing WeChat payment:', error);
+    }
+};
+
+const playGif = (msg) => {
+    // 处理支付失败
+    gifLoaded.value = true
+    nextTick(() => {
+        gif_d.value.addEventListener('animationend', function () {
+            gif_d.value.style.animation = 'none'; // 移除动画属性
+            gifLoaded.value = false
+            load.success(msg)
+        });
+    })
+};
+
 
 
 // 操作
-const Operation = (type, item, index) => {
+const Operation = async (type, item, index) => {
+    load.show()
     currentType.value = type
     switch (type) {
         case 'l':
@@ -229,6 +317,7 @@ const Operation = (type, item, index) => {
             showBottom.value = true
             break;
         case 'd':
+
             // 发货
             if (pathList.value.length < 1) {
                 load.model('是否前往地址铺新增地址', (r) => {
@@ -238,37 +327,40 @@ const Operation = (type, item, index) => {
                 })
                 return
             }
-            console.log(seleItem);
             const farm_stall = seleItem.value.map(item => {
                 return {
-                    farm_stall_id: item.farm_plot_id,
+                    farm_plot_products_id: item.farm_plot_products_id,
                     number: item.num
                 };
             });
-            http.post('postage', {
-                farm_stall: JSON.stringify(farm_stall),
+            const { data } = await await http.post('calcul', {
+                farm_plot_products: JSON.stringify(farm_stall),
                 farm_address_id: currentPath.value.farm_address_id
-            }).then((res) => {
-                console.log(res);
-                postage.value = res.data.amount
-                // postage.value = res.freight
-                showBottom.value = true
             })
+            postage.value = data
+            // postage.value = res.freight
+            showBottom.value = true
             break;
 
         default:
             break;
     }
+    load.hide()
 }
 
 //
 const editPer = (item, index, type) => {
     if (type === 'plus') {
-        seleItem.value[index] = item;
+        seleItem.value.push(item);
     } else if (type === 'minus') {
-        seleItem.value.splice(index, 1);
+        // 使用 Array.prototype.filter 方法删除匹配的元素
+        seleItem.value = seleItem.value.filter((element) => {
+            return element.farm_plot_id !== item.farm_plot_id;
+        });
     }
+    console.log(seleItem);
 }
+
 
 
 
@@ -293,6 +385,7 @@ const onLoad = () => {
 watch(
     () => unref(curFarmPlot).farm_plot_id,
     (va) => {
+        console.log(va);
         if (va) {
             getData()
         }
@@ -313,8 +406,9 @@ const getPaht = async () => {
 }
 
 // 蔬菜数据
-const getData = async () => {
+const getData = async (type) => {
     load.show();
+    showBottom.value = false;
     const { data } = await http
         .post("cooked", {
             farm_plot_id: unref(curFarmPlot).farm_plot_id,
@@ -326,13 +420,16 @@ const getData = async () => {
         data.forEach((i) => {
             i['num'] = 0
         })
-        console.log(data);
-        framList.value.push(...data);
+        if (type) {
+            framList.value = data
+        } else {
+            framList.value.push(...data);
+        }
     }
     setTimeout(() => {
         loading.value = false;
     }, 600);
-
+    load.hide();
 };
 
 watch(
@@ -343,6 +440,8 @@ watch(
         }
     }
 )
+
+
 
 
 
@@ -365,5 +464,21 @@ onMounted(() => {
 
 .show_container {
     box-shadow: 0 3.2px 12px #00000014, 0 5px 25px #0000000a;
+}
+
+.gif_d {
+    animation: play 6s forwards;
+    transition: visibility 0.5s;
+    /* 添加停止的过渡效果 */
+}
+
+@keyframes play {
+    to {
+        visibility: hidden;
+    }
+}
+
+.play-once {
+    animation: play 4s forwards;
 }
 </style>

@@ -35,21 +35,20 @@ export function setWxShareConfig(title, desc, link, imgUrl) {
 // 在需要分享的页面中调用 setWxShareConfig 方法
 // setWxShareConfig("分享标题", "分享��述", "分享链接", "分享图标链接");
 
+// 土地支付
 export async function wxPay(params) {
   return new Promise((resolve, reject) => {
     // 发起请求获取签名
     http.post("orderPay", params).then((data) => {
-      console.log(data);
       if (data.code === 200) {
         let userData = data.data.jsApi_request;
-        console.log(userData);
-        // 配置微信JS SDK
+        // 配置微信 JS SDK
         wx.config({
           debug: false,
           appId: userData.appId,
           timestamp: userData.timestamp,
           nonceStr: userData.nonceStr,
-          signature: data.sign,
+          signature: userData.sign,
           jsApiList: ["chooseWXPay"],
         });
         // 配置完成后调用微信支付
@@ -60,15 +59,45 @@ export async function wxPay(params) {
           signType: userData.signType,
           paySign: userData.sign,
           success: (res) => {
-            // 支付成功时返回resolve
+            // 支付成功时返回 resolve
             resolve(res);
           },
           fail: (err) => {
-            // 支付失败时返回reject
+            // 支付失败时返回 reject
             reject(err);
           },
         });
       }
+    });
+  });
+}
+
+export async function seedWxPay(params) {
+  return new Promise((resolve, reject) => {
+    // 发起请求获取签名
+    wx.config({
+      debug: false,
+      appId: params.appId,
+      timestamp: params.timestamp,
+      nonceStr: userData.nonceStr,
+      signature: data.sign,
+      jsApiList: ["chooseWXPay"],
+    });
+    // 配置完成后调用微信支付
+    wx.chooseWXPay({
+      timestamp: params.timestamp,
+      nonceStr: userData.nonceStr,
+      package: userData.package,
+      signType: userData.signType,
+      paySign: userData.sign,
+      success: (res) => {
+        // 支付成功时返回 resolve
+        resolve(res);
+      },
+      fail: (err) => {
+        // 支付失败时返回 reject
+        reject(err);
+      },
     });
   });
 }

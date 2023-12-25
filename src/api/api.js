@@ -7,7 +7,7 @@ import { useMainStore } from "../store/index.js";
 // 工具类
 // import * as Tools from "@/utils/tools/index";
 // import route from "@/router/routes.js";
-// import { load } from "@/utils/tools/loading.js";
+import { load } from "@/utils/tools/loading.js";
 
 // 请求源地址
 let prefix = window.location.origin;
@@ -19,7 +19,6 @@ const mainStor = useMainStore(pinia);
 const env = import.meta.env.DEV;
 
 // console.log(import.meta.env, env, process.env.NODE_ENV, "-------");
-console.log(env, import.meta.env);
 // 创建一个 Axios 实例
 const http = axios.create({
   baseURL: env ? devUrl : envUrl, // 设置基本的请求地址
@@ -52,36 +51,43 @@ http.interceptors.response.use(
   function (response) {
     // 对响应数据做点什么
     let code = response.data.code * 1;
-    let c = 0;
-    switch (code) {
-      case 200:
-        return response.data;
-      case 400: // 登录失效
-      case 404: // 登录失效
-      case 401: // 登录失效
-        c = 400;
-        break;
-      case 402: // 该账号未申请老师，请申请为老师
-        c = 402;
-        break;
-      case 403: // 该账号审核中
-        c = 403;
-        break;
-      case 405: // 该账号审核未通过
-        c = 405;
-        break;
-      case 408: // 该账号已禁用
-        c = 408;
-        break;
-      case 410: // token 已过期
-        c = 410;
-        break;
-      default:
+    let msg = response.data.msg;
+    console.log(response);
+    if (code === 200 || code === 280) {
+      return response.data;
+    } else {
+      // 对状态码为 200 以外的情况进行报错处理
+      let errorMessage = "未知错误";
+      switch (code) {
+        case 400:
+        case 404:
+        case 401:
+          errorMessage = msg;
+          break;
+        case 402:
+          errorMessage = "该账号未申请老师，请申请为老师";
+          break;
+        case 403:
+          errorMessage = "该账号审核中";
+          break;
+        case 405:
+          errorMessage = "该账号审核未通过";
+          break;
+        case 408:
+          errorMessage = "该账号已禁用";
+          break;
+        case 410:
+          errorMessage = "token 已过期";
+        case 500:
+          errorMessage = msg;
+          break;
+        default:
+          errorMessage = "未知错误";
+      }
+      // 抛出错误
+      load.error(errorMessage);
+      return Promise.reject(new Error(errorMessage));
     }
-    if (c > 0) {
-      //   store.dispatch("setUserStatus", c);
-    }
-    return response;
   },
   function (error) {
     // 对响应错误做点什么

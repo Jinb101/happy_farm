@@ -1,5 +1,4 @@
 const TouristApi = {
-  wx: "com/common/get_share", // 微信配置，
   // : 微信配置信息
   getShare: "/api/login/get_share",
 };
@@ -14,6 +13,10 @@ const MainApi = {
   naturCour: "farm/index/NaturalCourses",
   // : 接口：获取菜市
   foodMark: "farm/index/FoodMarket",
+  // : 接口：菜市详情
+  markDeta: "farm/index/MarketDetails",
+  // : 接口：菜市售卖列表
+  markCooked: "farm/index/CookedVegetables",
 
   // : 获取农场地块价格
   getPrice: "farm/common/GetSubscriptionPrice",
@@ -61,6 +64,19 @@ const MainApi = {
 
   // :  邮费计算
   postage: "farm/order/PurchaseAmount",
+  // :  邮费计算 - 我的蔬菜
+  calcul: "farm/order/CalculateShippingCosts",
+  // ：生成送菜订单
+  deFood: "farm/order/GenerateDeliveryOrder",
+  // 农场订单支付
+  delPay: "farm/order/DeliveryOrderPayment",
+
+  // 获取购物车
+  cart: "farm/cart/index",
+  // 添加修改购物车
+  editCart: "farm/cart/AddShoppingCart",
+  // 添加修改购物车
+  deletCart: "farm/cart/DeleteShoppingCart",
 };
 
 export { TouristApi, MainApi };

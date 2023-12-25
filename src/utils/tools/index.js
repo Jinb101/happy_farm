@@ -330,3 +330,27 @@ export function getUUID() {
     return v.toString(16);
   });
 }
+
+/**
+ * 将 Base64 编码的字符串转换为文件对象
+ * @param {String} base64String - Base64 编码的字符串
+ * @returns {File} - 表示 Base64 编码的字符串的文件对象
+ */
+export function base64ToFile(base64String) {
+  const byteString = atob(base64String.split(",")[1]);
+
+  // 解码后的字符串转换为 ArrayBuffer
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+
+  // 生成一个随机的文件名
+  const fileName = getUUID() + ".png";
+
+  // 创建一个文件对象
+  const file = new File([ab], fileName, { type: "image/png" });
+
+  return file;
+}
