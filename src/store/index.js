@@ -33,6 +33,8 @@ export const useMainStore = defineStore("main", {
       curActive: null,
       // 土地详情
       masData: null,
+      // 文本滚动
+      user_text: true,
     };
   },
   persist: true, // 添加 persist 属性

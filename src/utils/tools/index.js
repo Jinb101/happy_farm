@@ -45,7 +45,7 @@ export function getUrlParam(key) {
     const urlParams = new URLSearchParams(window.location.search);
     const value = urlParams.get(key);
     if (value === null) {
-      reject(new Error(`返回原页面重试`));
+      //   reject(new Error(`返回原页面重试`));
     } else {
       resolve(value);
     }

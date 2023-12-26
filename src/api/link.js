@@ -70,6 +70,8 @@ const MainApi = {
   deFood: "farm/order/GenerateDeliveryOrder",
   // 农场订单支付
   delPay: "farm/order/DeliveryOrderPayment",
+  // 生成购菜订单
+  vegOrder: "farm/order/VegetablePurchaseOrder",
 
   // 获取购物车
   cart: "farm/cart/index",

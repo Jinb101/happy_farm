@@ -43,24 +43,27 @@
                                     </div>
                                     <div v-else
                                          class=" flex justify-start items-center ml-4">
-                                        <span>待成熟</span>
+                                        <span class=" text-gray-400 text-xs">待成熟</span>
                                         <van-icon size="18px"
                                                   class="ml-2"
+                                                  color="rgb(156,163,175)"
                                                   name="clock-o" />
                                     </div>
                                 </div>
                                 <!--主体  -->
                                 <div v-if="item.status == 2"
                                      class=" text-left text-xs text-gray-400 ">
-                                    <div class=" mb-1">
+                                    <div class=" mt-1 ">
                                         <span>种植时间 : {{ parseInt(item.planting_month) }} 月</span>
                                     </div>
                                     <div v-if="item.status == 2"
-                                         class=" flex justify-start items-center">
+                                         class=" flex flex-col justify-start items-start mt-1">
                                         <span>预计成熟时间 :&nbsp;</span>
-                                        <van-count-down style=" font-size:12px"
-                                                        :time="timeText(item.expected_maturity_time)"
-                                                        format="DD 天 HH 时 mm 分 ss 秒" />
+                                        <div class=" mt-1 ">
+                                            <van-count-down style=" font-size:12px"
+                                                            :time="timeText(item.expected_maturity_time)"
+                                                            format="DD 天 HH 时 mm 分 ss 秒" />
+                                        </div>
                                     </div>
                                 </div>
                                 <div v-else
@@ -183,7 +186,6 @@ import { useMainStore } from '@/store/index.js'
 import { storeToRefs } from 'pinia'
 import ProductItem from "@/components/product/ProductItem.vue";
 import PathPay from "@/components/pay/PathPay.vue";
-import PaySeed from "@/components/pay/PaySeed.vue";
 
 const mainStor = useMainStore()
 const { curFarmPlot } = storeToRefs(mainStor)
@@ -265,7 +267,8 @@ const confirm = async () => {
             farm_plot_products: JSON.stringify(selectedItems),
         }).then((res) => {
             load.success(res.data.msg)
-            getData()
+            seleItem.value = []
+            getData(true)
         })
     }
 }
@@ -333,7 +336,7 @@ const Operation = async (type, item, index) => {
                     number: item.num
                 };
             });
-            const { data } = await await http.post('calcul', {
+            const { data } = await http.post('calcul', {
                 farm_plot_products: JSON.stringify(farm_stall),
                 farm_address_id: currentPath.value.farm_address_id
             })
@@ -350,17 +353,21 @@ const Operation = async (type, item, index) => {
 
 //
 const editPer = (item, index, type) => {
-    if (type === 'plus') {
-        seleItem.value.push(item);
-    } else if (type === 'minus') {
-        // 使用 Array.prototype.filter 方法删除匹配的元素
-        seleItem.value = seleItem.value.filter((element) => {
-            return element.farm_plot_id !== item.farm_plot_id;
-        });
-    }
-    console.log(seleItem);
-}
+    const existingItem = seleItem.value.find((element) => element.farm_plot_products_id === item.farm_plot_products_id);
+    if (existingItem) {
+        if (type === 'minus') {
+            nextTick(() => {
+                if (existingItem.num === 0) {
+                    const index = seleItem.value.indexOf(existingItem);
+                    seleItem.value.splice(index, 1);
+                }
+            })
+        }
 
+    } else {
+        seleItem.value.push(item)
+    }
+}
 
 
 
@@ -460,6 +467,17 @@ onMounted(() => {
 :deep(.deliv) {
     margin-top: 10px;
     font-size: 12px;
+}
+
+:deep(.van-count-down) {
+    font-size: 0.75rem
+        /* 12px */
+    ;
+    line-height: 1rem
+        /* 16px */
+    ;
+    color: rgb(156 163 175 / var(--tw-text-opacity));
+
 }
 
 .show_container {

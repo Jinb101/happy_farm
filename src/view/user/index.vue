@@ -38,7 +38,7 @@
                     <div class=" h-full w-1/2 flex justify-center items-center ">
                         <van-rolling-text class="my-rolling-text"
                                           :text-list="textList"
-                                          auto-start
+                                          :auto-start="user_text"
                                           :duration="2" />
                         <van-icon name="balance-o"
                                   size="24px"
@@ -65,9 +65,12 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
+import { useMainStore } from '@/store/index.js'
+import { storeToRefs } from 'pinia'
 import ProductItem from "@/components/product/ProductItem.vue";
 
-
+const mainStor = useMainStore()
+const { user_text } = storeToRefs(mainStor)
 
 const router = useRouter()
 
@@ -102,13 +105,14 @@ const toCEell = (item, index) => {
 
 
 const init = async () => {
-
     // 我的钱包
     const { data } = await http.post('myWall')
-    console.log(data);
+    console.log(user_text);
     myPay.value = data
     textList.value.push(data.balance)
-    console.log(myPay.value);
+    setTimeout(() => {
+        user_text.value = false
+    }, 2000);
 }
 
 

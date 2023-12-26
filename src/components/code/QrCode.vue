@@ -1,6 +1,7 @@
 <template>
     <div id="qrcode">
-        <img :src="imgUrl"
+        <img v-if="imgUrl !== ''"
+             :src="imgUrl"
              alt=""
              srcset="">
     </div>
@@ -47,8 +48,9 @@ const init = async () => {
     load.show()
     const { data } = await http.post(props.path);
     const file = Tools.base64ToFile(data)
-    console.log(file);
-    imgUrl.value = 'http://test.lide.jsxrk.xin/' + file.name;
+    console.log(file, `data:image/png;base64,${data}`);
+    imgUrl.value = `data:image/png;base64,${data}`
+    console.log(imgUrl.value);
     load.hide()
 
 }

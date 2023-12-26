@@ -50,7 +50,6 @@ const closeEmit = () => {
     emit('close');
 };
 const editItem = (item) => {
-    console.log(item);
     emit('changes', item);
     emit('close');
 };

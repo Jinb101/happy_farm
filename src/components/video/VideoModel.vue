@@ -32,7 +32,6 @@ const frame = ref(null)
 // 节点
 const full = ref(false)
 // 地址
-//:src="pathUrl + (s ? '&rotate=1' : '')"
 const pathUrl = ref('')
 
 
@@ -48,7 +47,6 @@ watch(
 const init = () => {
     // true 萤石云  false 大华
     passageToken.value = unref(masData).device_type === '1' ? unref(masData).access_token : masData.value.getkit_token
-    console.log(masData, passageToken.value);
     let type = +unref(masData).device_type === 1;
     if (unref(masData).device_type === undefined) {
         type = true;
